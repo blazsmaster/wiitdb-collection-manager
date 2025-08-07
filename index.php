@@ -1,5 +1,21 @@
 <?php
-  require_once 'includes/config.php';
+  require_once 'includes/bootstrap.php';
+
+  $result = [
+    'success' => false,
+    'message' => ''
+  ];
+
+  if (isset($_GET['action'])) {
+    if ($_GET['action'] === 'import_xml') {
+      $result = importXMLFromStaticFile();
+      header('Content-Type: application/json');
+      echo json_encode($result);
+      exit;
+    } else {
+      $result['message'] = 'Invalid action specified.';
+    }
+  }
 ?>
 
 <!doctype html>
@@ -18,5 +34,13 @@
   </head>
   <body>
     <h2><?php echo SITE_TITLE; ?></h2>
+
+    <div id='message'></div>
+    <div id='loading'></div>
+    <div id='stats'>
+      <b>Stats:</b> 0 games
+    </div>
+    <div id='area'></div>
   </body>
+  <script src='assets/js/main.js'></script>
 </html>

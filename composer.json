@@ -3,6 +3,8 @@
   "description": "WiiTDB Collection Manager",
   "type": "project",
   "require": {
-    "php": ">=7.4"
+    "php": ">=7.4",
+    "ext-simplexml": "*",
+    "ext-json": "*"
   }
 }
