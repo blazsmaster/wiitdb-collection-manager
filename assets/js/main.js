@@ -6,6 +6,9 @@ let db = [];
 // Storage keys
 const LS_GAME_DB_KEY = 'gameDB';
 
+// Values config
+const MESSAGE_TIMEOUT_MS = 5000;
+
 // UI
 const messageElement = document.getElementById('message');
 const loadingElement = document.getElementById('loading');
@@ -135,7 +138,8 @@ function deleteGame(gameId, gameName) {
 	}
 }
 
-// COMMON
+// Track message timeout
+let messageTimeout;
 
 /**
  * Show a message element
@@ -143,11 +147,20 @@ function deleteGame(gameId, gameName) {
  * @param type {'success' | 'error' | ''} - The type of message
  */
 function showMessage(text, type) {
+	if (messageTimeout) {
+		clearTimeout(messageTimeout);
+		messageTimeout = null;
+	}
+
 	if (text) {
-		messageElement.textContent = text + type;
+		messageElement.textContent = text;
+		messageElement.className = type ? `message ${type}` : 'message';
 		messageElement.style.display = 'block';
 
-		setTimeout(() => messageElement.style.display = 'none', 5000);
+		messageTimeout = setTimeout(() => {
+			messageElement.style.display = 'none';
+			messageTimeout = null;
+		}, MESSAGE_TIMEOUT_MS);
 	} else {
 		messageElement.style.display = 'none';
 	}
