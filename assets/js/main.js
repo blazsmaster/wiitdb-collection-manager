@@ -83,17 +83,17 @@ function renderTable() {
 		// Start row
 		html += '<tr>';
 		// ID
-		html += `<td>${game.id}</td>`;
+		html += `<td class='mono'>${game.id}</td>`;
 		// Name
-		html += `<td>${game.name}</td>`;
+		html += `<td class='overflow-protect'>${game.name}</td>`;
 		// Region
-		html += `<td>${game.region}</td>`;
+		html += `<td style='white-space: nowrap'>${game.region}</td>`;
 		// Languages
-		html += `<td>${game.language}</td>`;
+		html += `<td class='overflow-protect'>${game.language}</td>`;
 		// Developer
-		html += `<td>${game.developer}</td>`;
+		html += `<td class='overflow-protect'>${game.developer}</td>`;
 		// Publisher
-		html += `<td>${game.publisher}</td>`;
+		html += `<td class='overflow-protect'>${game.publisher}</td>`;
 		// End row
 		html += '</tr>';
 	}

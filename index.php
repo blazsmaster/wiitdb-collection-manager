@@ -31,6 +31,10 @@
       content='ie=edge'
     >
     <title><?php echo SITE_TITLE; ?></title>
+    <link
+      rel='stylesheet'
+      href='assets/css/styles.css'
+    >
   </head>
   <body>
     <h2><?php echo SITE_TITLE; ?></h2>
