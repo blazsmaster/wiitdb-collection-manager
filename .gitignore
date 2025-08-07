@@ -1,0 +1,10 @@
+# IntelliJ
+out/
+.idea/
+
+# SonarLint plugin
+.idea/sonarlint/
+
+# Composer
+.idea/composer.json
+composer.phar
