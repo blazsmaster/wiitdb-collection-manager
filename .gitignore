@@ -4,7 +4,12 @@ out/
 
 # SonarLint plugin
 .idea/sonarlint/
+.sonarlint/
 
 # Composer
 .idea/composer.json
 composer.phar
+composer.lock
+
+# Vendor
+vendor/

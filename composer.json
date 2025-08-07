@@ -1,2 +1,8 @@
 {
+  "name": "wiitdb/collection-manager",
+  "description": "WiiTDB Collection Manager",
+  "type": "project",
+  "require": {
+    "php": ">=7.4"
+  }
 }
