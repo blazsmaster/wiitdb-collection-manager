@@ -74,6 +74,7 @@ function renderTable() {
         <th>Languages</th>
         <th>Developer</th>
         <th>Publisher</th>
+        <th>Actions</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -94,6 +95,14 @@ function renderTable() {
 		html += `<td class='overflow-protect'>${game.developer}</td>`;
 		// Publisher
 		html += `<td class='overflow-protect'>${game.publisher}</td>`;
+
+		// Action buttons
+		html += `
+    <td>
+			<button class='btn' onclick='deleteGame("${game.id}", "${game.name}")'>Delete</button>
+		</td>
+		`;
+
 		// End row
 		html += '</tr>';
 	}
@@ -104,6 +113,26 @@ function renderTable() {
 	console.log(html);
 
 	areaElement.innerHTML = html;
+}
+
+/**
+ * Delete a game from the database
+ * @param gameId {string}
+ * @param gameName {string}
+ */
+function deleteGame(gameId, gameName) {
+	const dia = confirm(`Are you sure you want to delete this game?\n\n"${gameName}" (ID: ${gameId})`);
+	if (dia) {
+		const gameIndex = db.findIndex((g) => g.id === gameId);
+		if (gameIndex !== -1) {
+			db.splice(gameIndex, 1);
+			localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
+
+			showMessage(`"${gameName}" (ID: ${gameId}) has been deleted successfully.`, 'success');
+			updateStats();
+			renderTable();
+		}
+	}
 }
 
 // COMMON
