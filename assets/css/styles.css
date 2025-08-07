@@ -18,3 +18,8 @@ th, td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+#loading {
+  display: none;
+  margin: 10px 0;
+}

@@ -40,11 +40,13 @@
     <h2><?php echo SITE_TITLE; ?></h2>
 
     <div id='message'></div>
-    <div id='loading'></div>
+    <div id='loading'>Loading data, please wait...</div>
     <div id='stats'>
       <b>Stats:</b> 0 games
     </div>
-    <div id='area'></div>
+    <div id='area'>
+      <p><i>Loading game data...</i></p>
+    </div>
   </body>
   <script src='assets/js/main.js'></script>
 </html>
