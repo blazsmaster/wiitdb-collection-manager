@@ -3,6 +3,12 @@
  * @property {boolean} success - Whether the import was successful
  * @property {string} message - Response message
  * @property {Game[]} games - Array of Game objects
+ * @property {Filter} filters - Filter options
+ */
+
+/**
+ * @typedef {Object} Filter
+ * @property {string[]} region - Array of region strings
  */
 
 /**

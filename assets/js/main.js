@@ -2,11 +2,24 @@
  * @type {Game[]}
  */
 let db = [];
+/**
+ * @type {Game[]}
+ */
+let filteredGames = [];
+
+let filters = {
+	region: [],
+};
+let activeFilters = {
+	region: '',
+};
 
 // Storage keys
 const LS_GAME_DB_KEY = 'gameDB';
+const LS_FILTERS_KEY = 'filters';
 
 // Values config
+const DISPLAY_UNKNOWN_FILTER = true;
 const MESSAGE_TIMEOUT_MS = 5000;
 
 // UI
@@ -15,23 +28,40 @@ const loadingElement = document.getElementById('loading');
 const statsElement = document.getElementById('stats');
 const areaElement = document.getElementById('area');
 
+// UI Filters
+const regionFilterElement = document.getElementById('regionFilter');
+
+// Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
+
+regionFilterElement.addEventListener('change', function () {
+	console.log('regionFilter change');
+	activeFilters.region = this.value;
+	applyFilters();
+});
 
 function initApp() {
 	loadGamesFromLocalStorage();
 }
 
 function loadGamesFromLocalStorage() {
-	const games = localStorage.getItem(LS_GAME_DB_KEY);
+	const storedGames = localStorage.getItem(LS_GAME_DB_KEY);
+	const storedFilters = localStorage.getItem(LS_FILTERS_KEY);
 
-	if (games) {
-		db = JSON.parse(games);
+	if (storedGames) {
+		db = JSON.parse(storedGames);
+		if (storedFilters) {
+			filters = JSON.parse(storedFilters);
+		} else {
+			calculateFilterOptions();
+		}
+		populateFilterDropdowns();
+		applyFilters();
 	} else {
 		importXML();
 	}
 
-	updateStats();
-	renderTable();
+	applyFilters();
 }
 
 function importXML() {
@@ -43,8 +73,14 @@ function importXML() {
 		.then(/*** @param {ImportXmlResponse} data*/(data) => {
 			if (data.success) {
 				db = data.games;
-				showMessage(`XML data imported successfully: ${data.message}`, 'success');
+				filters = data.filters;
+
 				localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
+				localStorage.setItem(LS_FILTERS_KEY, JSON.stringify(filters));
+
+				populateFilterDropdowns();
+				applyFilters();
+				showMessage(`XML data imported successfully: ${data.message}`, 'success');
 			} else {
 				showMessage('Error fetching XML data: ' + data.message, 'error');
 			}
@@ -56,13 +92,70 @@ function importXML() {
 		});
 }
 
+function applyFilters() {
+	filteredGames = db.filter((game) => {
+		return !(activeFilters.region && game.region !== activeFilters.region);
+	});
+
+	updateStats();
+	renderTable();
+}
+
 function updateStats() {
-	statsElement.innerHTML = `<b>Stats:</b> ${db.length} games`;
+	statsElement.innerHTML = `<b>Stats:</b> ${db.length} total games, ${filteredGames.length} shown`;
+}
+
+/**
+ * Populates a select element with options.
+ * @param {HTMLSelectElement} selectElement - The select element to populate.
+ * @param {string[]} options
+ * @param {string} selectedValue - The value to select by default.
+ */
+function populateDropdown(selectElement, options, selectedValue) {
+	const placeholder = selectElement.options[0];
+	selectElement.innerHTML = '';
+	selectElement.appendChild(placeholder);
+
+	options.forEach((option) => {
+		const optionElement = document.createElement('option');
+		optionElement.value = option;
+		optionElement.textContent = option;
+
+		if (option === selectedValue) {
+			optionElement.selected = true;
+		}
+
+		if (option === 'Unknown' && !DISPLAY_UNKNOWN_FILTER) {
+			optionElement.style.display = 'none';
+		}
+
+		selectElement.appendChild(optionElement);
+	});
+}
+
+function populateFilterDropdowns() {
+	populateDropdown(regionFilterElement, filters.region, activeFilters.region);
+}
+
+function calculateFilterOptions() {
+	let regions = new Set();
+
+	for (const game of db) {
+		if (game.region) {
+			regions.add(game.region);
+		}
+	}
+
+	filters = {
+		region: Array.from(regions).sort(),
+	};
+
+	localStorage.setItem(LS_FILTERS_KEY, JSON.stringify(filters));
 }
 
 function renderTable() {
 	if (db.length === 0) {
-		areaElement.innerHTML = '<p><i>No games loaded. Please import XML data.</i></p>';
+		areaElement.innerHTML = '<p><i>No games loaded. Importing XML data...</i></p>';
 		return;
 	}
 
@@ -83,21 +176,21 @@ function renderTable() {
 	  <tbody>
 	`;
 
-	for (const game of db) {
+	for (const game of filteredGames) {
 		// Start row
 		html += '<tr>';
 		// ID
 		html += `<td class='mono'>${game.id}</td>`;
 		// Name
-		html += `<td class='overflow-protect'>${game.name}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 300px'>${game.name}</td>`;
 		// Region
-		html += `<td style='white-space: nowrap'>${game.region}</td>`;
+		html += `<td class='overflow-protect' style='white-space: nowrap'>${escapeUnknownStr(game.region)}</td>`;
 		// Languages
-		html += `<td class='overflow-protect'>${game.language}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.language)}</td>`;
 		// Developer
-		html += `<td class='overflow-protect'>${game.developer}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 200px'>${escapeUnknownStr(game.developer)}</td>`;
 		// Publisher
-		html += `<td class='overflow-protect'>${game.publisher}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 200px'>${escapeUnknownStr(game.publisher)}</td>`;
 
 		// Action buttons
 		html += `
@@ -113,15 +206,13 @@ function renderTable() {
 	// Fix table generator end
 	html += `</tbody></table>`;
 
-	console.log(html);
-
 	areaElement.innerHTML = html;
 }
 
 /**
  * Delete a game from the database
- * @param gameId {string}
- * @param gameName {string}
+ * @param {string} gameId
+ * @param {string} gameName
  */
 function deleteGame(gameId, gameName) {
 	const dia = confirm(`Are you sure you want to delete this game?\n\n"${gameName}" (ID: ${gameId})`);
@@ -132,8 +223,7 @@ function deleteGame(gameId, gameName) {
 			localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
 
 			showMessage(`"${gameName}" (ID: ${gameId}) has been deleted successfully.`, 'success');
-			updateStats();
-			renderTable();
+			applyFilters();
 		}
 	}
 }
@@ -143,8 +233,8 @@ let messageTimeout;
 
 /**
  * Show a message element
- * @param text {string} - The message text to display
- * @param type {'success' | 'error' | ''} - The type of message
+ * @param {string} text  - The message text to display
+ * @param {MessageType} type - The type of message
  */
 function showMessage(text, type) {
 	if (messageTimeout) {
@@ -168,8 +258,16 @@ function showMessage(text, type) {
 
 /**
  * Show or hide the loading element
- * @param show {boolean} - Whether to show or hide the loading element
+ * @param {boolean} show - Whether to show or hide the loading element
  */
 function showLoading(show) {
 	loadingElement.style.display = show ? 'block' : 'none';
+}
+
+/**
+ * Escape "unknown" string values
+ * @param {string} value
+ */
+function escapeUnknownStr(value) {
+	return value.toLocaleLowerCase() === 'unknown' ? '' : value;
 }

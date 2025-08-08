@@ -44,6 +44,15 @@
     <div id='stats'>
       <b>Stats:</b> 0 games
     </div>
+
+    <!-- Filters -->
+    <div>
+      <select id='regionFilter'>
+        <option value=''>All Regions</option>
+      </select>
+    </div>
+    <!-- End Filters -->
+
     <div id='area'>
       <p><i>Loading game data...</i></p>
     </div>

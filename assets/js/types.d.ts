@@ -2,6 +2,11 @@ interface ImportXmlResponse {
 	success: boolean;
 	message: string;
 	games: Game[];
+	filters: Filter;
+}
+
+interface Filter {
+	region: string[];
 }
 
 interface Game {
@@ -13,3 +18,5 @@ interface Game {
 	publisher: string;
 	type: string;
 }
+
+type MessageType = 'success' | 'error' | ''

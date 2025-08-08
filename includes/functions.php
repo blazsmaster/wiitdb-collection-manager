@@ -3,7 +3,10 @@
         $result = [
             'success' => false,
             'message' => '',
-            'games' => []
+            'games' => [],
+            'filters' => [
+                'region' => []
+            ]
         ];
 
         if (!file_exists($filePath)) {
@@ -20,6 +23,8 @@
 
             $games = [];
 
+            $regions = [];
+
             foreach ($xml -> game as $game) {
                 $id = (string)$game -> id;
                 $name = (string)$game['name'];
@@ -28,6 +33,13 @@
                 $developer = (string)$game -> developer;
                 $publisher = (string)$game -> publisher;
                 $type = (string)$game -> type;
+
+                // Filter: Region
+                if (!empty($region)) {
+                    $regions[] = $region;
+                } else {
+                    $region = 'Unknown';
+                }
 
                 $games[] = [
                     'id' => $id,
@@ -40,13 +52,19 @@
                 ];
             }
 
+            $regions = array_unique($regions);
+            sort($regions);
+
             usort($games, function ($a, $b) {
                 return strcmp($a['id'], $b['id']);
             });
 
             $result['games'] = $games;
-            $result['message'] = 'Successfully parsed ' . count($games) . ' games.';
             $result['success'] = true;
+            $result['filters'] = [
+                'region' => $regions
+            ];
+            $result['message'] = 'Successfully parsed ' . count($games) . ' games.';
         } catch (Exception $e) {
             $result['message'] = 'Error parsing XML file: ' . $e -> getMessage();
         }
