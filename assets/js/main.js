@@ -30,6 +30,7 @@ const LS_GAME_DB_KEY = 'gameDB';
 const LS_FILTERS_KEY = 'filters';
 
 // Values config
+const DEBOUNCE_DELAY = 300;
 const DISPLAY_UNKNOWN_FILTER = true;
 const MESSAGE_TIMEOUT_MS = 5000;
 
@@ -44,9 +45,14 @@ const regionFilterElement = document.getElementById('regionFilter');
 const languageFilterElement = document.getElementById('languageFilter');
 const developerFilterElement = document.getElementById('developerFilter');
 const publisherFilterElement = document.getElementById('publisherFilter');
+const searchInputElement = document.getElementById('searchInput');
+const searchFieldElement = document.getElementById('searchField');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
+
+searchInputElement.addEventListener('input', debounce(applyFilters, DEBOUNCE_DELAY));
+searchFieldElement.addEventListener('change', applyFilters);
 
 regionFilterElement.addEventListener('change', function () {
 	activeFilters.region = this.value;
@@ -118,15 +124,41 @@ function importXML() {
 }
 
 function applyFilters() {
+	const searchTerm = searchInputElement.value.toLowerCase();
+	const searchField = searchFieldElement.value;
+
 	filteredGames = db.filter((game) => {
-		if (!matchesFilter(game, 'region')) return false;
-		if (!matchesFilter(game, 'language')) return false;
-		if (!matchesFilter(game, 'developer')) return false;
-		return matchesFilter(game, 'publisher');
+		if (searchTerm && searchField && !matchesSearchTerm(game, searchField, searchTerm)) {
+			return false;
+		}
+		return matchesFilter(game, 'region') &&
+			matchesFilter(game, 'language') &&
+			matchesFilter(game, 'developer') &&
+			matchesFilter(game, 'publisher');
 	});
 
 	updateStats();
 	renderTable();
+}
+
+/**
+ * Check if a game matches the search term in the specified field
+ * @param {Game} game
+ * @param {string} field
+ * @param {string} searchTerm
+ */
+function matchesSearchTerm(game, field, searchTerm) {
+	if (!game[field]) {
+		return false;
+	}
+	if (game[field].toLowerCase() === 'unknown') {
+		return false;
+	}
+	if (field === 'developer' || field === 'publisher') {
+		const values = game[field].toLowerCase().split(',').map(v => v.trim());
+		return values.some(value => value.includes(searchTerm));
+	}
+	return game[field].toLowerCase().includes(searchTerm);
 }
 
 /**
@@ -143,6 +175,15 @@ function matchesFilter(game, filterType) {
 	const gameValue = game[filterType];
 	if (activeValue === 'Unknown') {
 		return !gameValue || gameValue.toLowerCase() === 'unknown';
+	}
+
+	if (filterType === 'language' && gameValue) {
+		return gameValue.toLowerCase().includes(activeValue.toLowerCase());
+	}
+
+	if ((filterType === 'developer' || filterType === 'publisher') && gameValue) {
+		const values = gameValue.split(',').map(v => v.trim());
+		return values.includes(activeValue);
 	}
 
 	return gameValue === activeValue;
@@ -346,4 +387,18 @@ function showLoading(show) {
  */
 function escapeUnknownStr(value) {
 	return value.toLocaleLowerCase() === 'unknown' ? '' : value;
+}
+
+/**
+ * Debounce function to limit how often a function can be called
+ * @param func
+ * @param delayMs
+ */
+function debounce(func, delayMs) {
+	let timeout;
+	return function (...args) {
+		const ctx = this;
+		clearTimeout(timeout);
+		timeout = setTimeout(() => func.apply(ctx, args), delayMs);
+	};
 }

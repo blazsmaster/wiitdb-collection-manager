@@ -47,6 +47,24 @@
 
     <!-- Filters -->
     <div>
+      <input
+        type='text'
+        id='searchInput'
+        placeholder='Search...'
+      />
+      <select id='searchField'>
+        <option value='name'>Name</option>
+        <option
+          value='id'
+          selected
+        >
+          ID
+        </option>
+        <option value='developer'>Developer</option>
+        <option value='publisher'>Publisher</option>
+      </select>
+    </div>
+    <div>
       <select id='regionFilter'>
         <option value=''>All Regions</option>
       </select>
