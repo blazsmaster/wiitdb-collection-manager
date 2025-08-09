@@ -421,10 +421,46 @@ function handleImgMouseOver(src, event) {
 	hoverTimeout = setTimeout(() => {
 		const tooltip = document.getElementById('imgTooltip');
 		tooltip.innerHTML = `<img src='${src}' alt='' class='img-tooltip-preview' />`;
-		tooltip.style.left = (event.pageX + 20) + 'px';
-		tooltip.style.top = (event.pageY + 20) + 'px';
+		positionFixedTooltip(tooltip, event);
 		tooltip.style.display = 'block';
 	}, 300);
+}
+
+/**
+ * Position the tooltip based on the mouse event
+ * @param {HTMLElement} tooltip
+ * @param {MouseEvent} event
+ */
+function positionFixedTooltip(tooltip, event) {
+	const vw = window.innerWidth;
+	const vh = window.innerHeight;
+
+	tooltip.style.maxWidth = '250px';
+	tooltip.style.maxHeight = '250px';
+	tooltip.style.display = 'block';
+	tooltip.style.left = '-9999px';
+	tooltip.style.top = '-9999px';
+
+	const tooltipWidth = Math.min(tooltip.offsetWidth, 250);
+	const tooltipHeight = Math.min(tooltip.offsetHeight, 250);
+	const padding = 20;
+
+	let left = event.clientX + padding;
+	if (left + tooltipWidth + padding > vw) {
+		left = event.clientX - tooltipWidth - padding;
+	}
+	left = Math.max(padding, left);
+	left = Math.min(left, vw - tooltipWidth - padding);
+
+	let top = event.clientY + padding;
+	if (top + tooltipHeight + padding > vh) {
+		top = event.clientY - tooltipHeight - padding;
+	}
+	top = Math.max(padding, top);
+	top = Math.min(top, vh - tooltipHeight - padding);
+
+	tooltip.style.left = `${left}px`;
+	tooltip.style.top = `${top}px`;
 }
 
 function handleImgMouseOut() {

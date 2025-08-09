@@ -1,3 +1,10 @@
+:root {
+  --primary: oklch(0.744 0.156 234.305);
+  --secondary-color: oklch(0.982 0 89.876);
+  --border-color: oklch(0.845 0 89.876);
+  --border-dark-color: oklch(0.321 0 89.876);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -6,7 +13,7 @@ table {
 th, td {
   padding: 8px;
   text-align: left;
-  border: 1px solid #CCC;
+  border: 1px solid var(--border-color);
 }
 
 .mono {
@@ -34,16 +41,22 @@ th, td {
 }
 
 .img-tooltip {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
+  z-index: 1000;
   display: none;
-  border: 2px solid #333;
-  background: #FFF;
+  border: 2px solid var(--border-dark-color);
+  background: var(--secondary-color);
+  backdrop-filter: blur(10px);
   padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.2);
+  max-width: 250px;
+  max-height: 250px;
+  overflow: hidden;
 }
 
 .img-tooltip-preview {
   display: block;
-  zoom: 1.35;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
