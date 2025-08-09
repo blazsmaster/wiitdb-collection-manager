@@ -8,7 +8,10 @@
 
 /**
  * @typedef {Object} Filter
- * @property {string[]} region - Array of region strings
+ * @property {string[]} region
+ * @property {string[]} language
+ * @property {string[]} developer
+ * @property {string[]} publisher
  */
 
 /**

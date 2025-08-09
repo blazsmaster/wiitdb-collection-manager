@@ -5,7 +5,10 @@
             'message' => '',
             'games' => [],
             'filters' => [
-                'region' => []
+                'region' => [],
+                'language' => [],
+                'developer' => [],
+                'publisher' => []
             ]
         ];
 
@@ -22,8 +25,12 @@
             }
 
             $games = [];
-
-            $regions = [];
+            $filters = [
+                'region' => [],
+                'language' => [],
+                'developer' => [],
+                'publisher' => []
+            ];
 
             foreach ($xml -> game as $game) {
                 $id = (string)$game -> id;
@@ -34,12 +41,10 @@
                 $publisher = (string)$game -> publisher;
                 $type = (string)$game -> type;
 
-                // Filter: Region
-                if (!empty($region)) {
-                    $regions[] = $region;
-                } else {
-                    $region = 'Unknown';
-                }
+                processAttribute($region, $filters['region'], false);
+                processAttribute($language, $filters['language']);
+                processAttribute($developer, $filters['developer']);
+                processAttribute($publisher, $filters['publisher']);
 
                 $games[] = [
                     'id' => $id,
@@ -52,18 +57,17 @@
                 ];
             }
 
-            $regions = array_unique($regions);
-            sort($regions);
-
+            sort($filters['region']);
+            sort($filters['language']);
+            sort($filters['developer']);
+            sort($filters['publisher']);
             usort($games, function ($a, $b) {
                 return strcmp($a['id'], $b['id']);
             });
 
             $result['games'] = $games;
             $result['success'] = true;
-            $result['filters'] = [
-                'region' => $regions
-            ];
+            $result['filters'] = $filters;
             $result['message'] = 'Successfully parsed ' . count($games) . ' games.';
         } catch (Exception $e) {
             $result['message'] = 'Error parsing XML file: ' . $e -> getMessage();
@@ -74,4 +78,23 @@
 
     function importXMLFromStaticFile(): ?array {
         return parseXMLtoGameData(XML_SOURCE_FILE);
+    }
+
+    function processAttribute($attrStr, &$targetArr, $splitCommas = true) {
+        if (empty($attrStr)) {
+            $attrStr = 'Unknown';
+        }
+
+        if ($splitCommas) {
+            $values = array_map('trim', explode(',', $attrStr));
+            foreach ($values as $value) {
+                if (!empty($value) && !in_array($value, $targetArr, true)) {
+                    $targetArr[] = $value;
+                }
+            }
+        } else {
+            if (!in_array($attrStr, $targetArr, true)) {
+                $targetArr[] = $attrStr;
+            }
+        }
     }

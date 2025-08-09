@@ -50,6 +50,15 @@
       <select id='regionFilter'>
         <option value=''>All Regions</option>
       </select>
+      <select id='languageFilter'>
+        <option value=''>All Languages</option>
+      </select>
+      <select id='developerFilter'>
+        <option value=''>All Developers</option>
+      </select>
+      <select id='publisherFilter'>
+        <option value=''>All Publishers</option>
+      </select>
     </div>
     <!-- End Filters -->
 

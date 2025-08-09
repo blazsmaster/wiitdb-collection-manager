@@ -7,6 +7,16 @@ interface ImportXmlResponse {
 
 interface Filter {
 	region: string[];
+	language: string[];
+	developer: string[];
+	publisher: string[];
+}
+
+interface ActiveFilter {
+	region: string;
+	language: string;
+	developer: string;
+	publisher: string;
 }
 
 interface Game {
@@ -20,3 +30,4 @@ interface Game {
 }
 
 type MessageType = 'success' | 'error' | ''
+type FilterOptions = 'region' | 'language' | 'developer' | 'publisher'

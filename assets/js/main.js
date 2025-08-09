@@ -6,12 +6,23 @@ let db = [];
  * @type {Game[]}
  */
 let filteredGames = [];
-
+/**
+ * @type {Filter}
+ */
 let filters = {
 	region: [],
+	language: [],
+	developer: [],
+	publisher: [],
 };
+/**
+ * @type {ActiveFilter}
+ */
 let activeFilters = {
 	region: '',
+	language: '',
+	developer: '',
+	publisher: '',
 };
 
 // Storage keys
@@ -30,13 +41,27 @@ const areaElement = document.getElementById('area');
 
 // UI Filters
 const regionFilterElement = document.getElementById('regionFilter');
+const languageFilterElement = document.getElementById('languageFilter');
+const developerFilterElement = document.getElementById('developerFilter');
+const publisherFilterElement = document.getElementById('publisherFilter');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
 
 regionFilterElement.addEventListener('change', function () {
-	console.log('regionFilter change');
 	activeFilters.region = this.value;
+	applyFilters();
+});
+languageFilterElement.addEventListener('change', function () {
+	activeFilters.language = this.value;
+	applyFilters();
+});
+developerFilterElement.addEventListener('change', function () {
+	activeFilters.developer = this.value;
+	applyFilters();
+});
+publisherFilterElement.addEventListener('change', function () {
+	activeFilters.publisher = this.value;
 	applyFilters();
 });
 
@@ -94,11 +119,33 @@ function importXML() {
 
 function applyFilters() {
 	filteredGames = db.filter((game) => {
-		return !(activeFilters.region && game.region !== activeFilters.region);
+		if (!matchesFilter(game, 'region')) return false;
+		if (!matchesFilter(game, 'language')) return false;
+		if (!matchesFilter(game, 'developer')) return false;
+		return matchesFilter(game, 'publisher');
 	});
 
 	updateStats();
 	renderTable();
+}
+
+/**
+ * Check if a game matches a specific filter
+ * @param {Game} game
+ * @param {FilterOptions} filterType
+ */
+function matchesFilter(game, filterType) {
+	const activeValue = activeFilters[filterType];
+	if (!activeValue) {
+		return true;
+	}
+
+	const gameValue = game[filterType];
+	if (activeValue === 'Unknown') {
+		return !gameValue || gameValue.toLowerCase() === 'unknown';
+	}
+
+	return gameValue === activeValue;
 }
 
 function updateStats() {
@@ -116,7 +163,22 @@ function populateDropdown(selectElement, options, selectedValue) {
 	selectElement.innerHTML = '';
 	selectElement.appendChild(placeholder);
 
-	options.forEach((option) => {
+	const sortedOptions = [...options].filter(option => option !== 'Unknown');
+	sortedOptions.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+	if (options.includes('Unknown') && DISPLAY_UNKNOWN_FILTER) {
+		const unknownElement = document.createElement('option');
+		unknownElement.value = 'Unknown';
+		unknownElement.textContent = 'Unknown';
+
+		if ('Unknown' === selectedValue) {
+			unknownElement.selected = true;
+		}
+
+		selectElement.appendChild(unknownElement);
+	}
+
+	sortedOptions.forEach((option) => {
 		const optionElement = document.createElement('option');
 		optionElement.value = option;
 		optionElement.textContent = option;
@@ -125,29 +187,43 @@ function populateDropdown(selectElement, options, selectedValue) {
 			optionElement.selected = true;
 		}
 
-		if (option === 'Unknown' && !DISPLAY_UNKNOWN_FILTER) {
-			optionElement.style.display = 'none';
-		}
-
 		selectElement.appendChild(optionElement);
 	});
 }
 
 function populateFilterDropdowns() {
 	populateDropdown(regionFilterElement, filters.region, activeFilters.region);
+	populateDropdown(languageFilterElement, filters.language, activeFilters.language);
+	populateDropdown(developerFilterElement, filters.developer, activeFilters.developer);
+	populateDropdown(publisherFilterElement, filters.publisher, activeFilters.publisher);
 }
 
 function calculateFilterOptions() {
 	let regions = new Set();
+	let languages = new Set();
+	let developers = new Set();
+	let publishers = new Set();
 
 	for (const game of db) {
 		if (game.region) {
 			regions.add(game.region);
 		}
+		if (game.language) {
+			languages.add(game.language);
+		}
+		if (game.developer) {
+			developers.add(game.developer);
+		}
+		if (game.publisher) {
+			publishers.add(game.publisher);
+		}
 	}
 
 	filters = {
 		region: Array.from(regions).sort(),
+		language: Array.from(languages).sort(),
+		developer: Array.from(developers).sort(),
+		publisher: Array.from(publishers).sort(),
 	};
 
 	localStorage.setItem(LS_FILTERS_KEY, JSON.stringify(filters));
