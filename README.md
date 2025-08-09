@@ -7,9 +7,9 @@ A little personal project to browse and manage your Wii game catalog provided by
 - [x] Import and parse WiiTDB XML files
 - [ ] Browse your Wii game collection with detailed information
 - [x] Store game data locally in your browser
-- [ ] Sort and filter games by various criteria
+- [x] Sort and filter games by various criteria
 - [ ] Mark games as owned or not owned
-- [ ] Search for games by title or other attributes
+- [x] Search for games by title or other attributes
 - [ ] Create and manage personal collections
 - [ ] Per game details view with cover art, disc images, and detailed descriptions
 - [ ] Save and export your collection data (snapshots)

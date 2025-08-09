@@ -15,6 +15,15 @@
  */
 
 /**
+ * @typedef {Object} ActiveFilter
+ * @property {string} region - Selected region
+ * @property {string} language - Selected language
+ * @property {string} developer - Selected developer
+ * @property {string} publisher - Selected publisher
+ * @property {string} regionCode - Selected region code
+ */
+
+/**
  * @typedef {Object} Game
  * @property {string} id
  * @property {string} name

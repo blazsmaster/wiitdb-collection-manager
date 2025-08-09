@@ -17,6 +17,7 @@ interface ActiveFilter {
 	language: string;
 	developer: string;
 	publisher: string;
+	regionCode: string;
 }
 
 interface Game {
@@ -30,4 +31,4 @@ interface Game {
 }
 
 type MessageType = 'success' | 'error' | ''
-type FilterOptions = 'region' | 'language' | 'developer' | 'publisher'
+type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode'

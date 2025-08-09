@@ -47,6 +47,15 @@
 
     <!-- Filters -->
     <div>
+      <label>
+        <input
+          type='checkbox'
+          id='hideDemo'
+        />
+        Hide demo titles
+      </label>
+    </div>
+    <div>
       <input
         type='text'
         id='searchInput'
@@ -76,6 +85,9 @@
       </select>
       <select id='publisherFilter'>
         <option value=''>All Publishers</option>
+      </select>
+      <select id='regionCodeFilter'>
+        <option value=''>All Region Codes</option>
       </select>
     </div>
     <!-- End Filters -->

@@ -23,6 +23,7 @@ let activeFilters = {
 	language: '',
 	developer: '',
 	publisher: '',
+	regionCode: '',
 };
 
 // Storage keys
@@ -47,12 +48,16 @@ const developerFilterElement = document.getElementById('developerFilter');
 const publisherFilterElement = document.getElementById('publisherFilter');
 const searchInputElement = document.getElementById('searchInput');
 const searchFieldElement = document.getElementById('searchField');
+const hideDemoElement = document.getElementById('hideDemo');
+const regionCodeFilterElement = document.getElementById('regionCodeFilter');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
 
 searchInputElement.addEventListener('input', debounce(applyFilters, DEBOUNCE_DELAY));
 searchFieldElement.addEventListener('change', applyFilters);
+
+hideDemoElement.addEventListener('change', applyFilters);
 
 regionFilterElement.addEventListener('change', function () {
 	activeFilters.region = this.value;
@@ -68,6 +73,10 @@ developerFilterElement.addEventListener('change', function () {
 });
 publisherFilterElement.addEventListener('change', function () {
 	activeFilters.publisher = this.value;
+	applyFilters();
+});
+regionCodeFilterElement.addEventListener('change', function () {
+	activeFilters.regionCode = this.value;
 	applyFilters();
 });
 
@@ -126,19 +135,34 @@ function importXML() {
 function applyFilters() {
 	const searchTerm = searchInputElement.value.toLowerCase();
 	const searchField = searchFieldElement.value;
+	const hideDemo = hideDemoElement.checked;
 
 	filteredGames = db.filter((game) => {
+		if (hideDemo && isMatchingDemo(game)) {
+			return false;
+		}
 		if (searchTerm && searchField && !matchesSearchTerm(game, searchField, searchTerm)) {
 			return false;
 		}
 		return matchesFilter(game, 'region') &&
 			matchesFilter(game, 'language') &&
 			matchesFilter(game, 'developer') &&
-			matchesFilter(game, 'publisher');
+			matchesFilter(game, 'publisher') &&
+			matchesFilter(game, 'regionCode');
 	});
 
 	updateStats();
 	renderTable();
+}
+
+/**
+ * Check if a game matches the demo filter
+ * @param {Game} game
+ */
+function isMatchingDemo(game) {
+	const discCode = game.id.charAt(0).toUpperCase();
+	const gameName = game.name.toLowerCase();
+	return discCode === 'D' || gameName.includes(' demo ') || gameName.includes(' (demo) ');
 }
 
 /**
@@ -184,6 +208,14 @@ function matchesFilter(game, filterType) {
 	if ((filterType === 'developer' || filterType === 'publisher') && gameValue) {
 		const values = gameValue.split(',').map(v => v.trim());
 		return values.includes(activeValue);
+	}
+
+	if (filterType === 'regionCode' && game.id) {
+		const regionCode = game.id[3];
+		if (!regionCode) {
+			return false;
+		}
+		return regionCode === activeValue;
 	}
 
 	return gameValue === activeValue;
@@ -237,6 +269,13 @@ function populateFilterDropdowns() {
 	populateDropdown(languageFilterElement, filters.language, activeFilters.language);
 	populateDropdown(developerFilterElement, filters.developer, activeFilters.developer);
 	populateDropdown(publisherFilterElement, filters.publisher, activeFilters.publisher);
+	populateDropdown(
+		regionCodeFilterElement,
+		Array.from(
+			new Set(db.map((game) => game.id?.[3]).filter((c) => RegExp(/[A-Z]/i).exec(c))),
+		).sort(),
+		activeFilters.regionCode,
+	);
 }
 
 function calculateFilterOptions() {
