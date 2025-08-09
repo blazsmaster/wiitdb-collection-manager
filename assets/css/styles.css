@@ -22,3 +22,12 @@ th, td {
   display: none;
   margin: 10px 0;
 }
+
+.fit-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.image-asset-inline {
+  height: 40px;
+}

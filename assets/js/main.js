@@ -320,6 +320,8 @@ function renderTable() {
 	<table>
 	  <thead>
 	    <tr>
+	    	<th></th>
+	    	<th></th>
 	      <th>ID</th>
         <th>Name</th>
         <th>Region</th>
@@ -333,8 +335,15 @@ function renderTable() {
 	`;
 
 	for (const game of filteredGames) {
+		const coverSrc = `index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`;
+		const discSrc = `index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`;
+
 		// Start row
 		html += '<tr>';
+		// Cover art
+		html += `<td class='overflow-protect fit-cell'><img src='${coverSrc}' alt='' loading='lazy' class='image-asset-inline' /></td>`;
+		// Disc art
+		html += `<td class='overflow-protect fit-cell'><img src='${discSrc}' alt='' loading='lazy' class='image-asset-inline' /></td>`;
 		// ID
 		html += `<td class='mono'>${game.id}</td>`;
 		// Name

@@ -12,6 +12,18 @@
       header('Content-Type: application/json');
       echo json_encode($result);
       exit;
+    } elseif ($_GET['action'] === 'get_asset' && isset($_GET['id']) && isset($_GET['type'])) {
+      $gameId = $_GET['id'];
+      $assetType = $_GET['type'];
+
+      $assetPath = getGameAssetPath($gameId, $assetType);
+
+      if (file_exists($assetPath) && strpos($assetPath, 'assets/') === 0) {
+        header('Location: ' . $assetPath);
+      } else {
+        header('Location: ' . ($assetType === 'cover' ? COVER_URL_BASE : DISC_URL_BASE) . $gameId . '.png');
+      }
+      exit;
     } else {
       $result['message'] = 'Invalid action specified.';
     }
