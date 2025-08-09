@@ -341,9 +341,27 @@ function renderTable() {
 		// Start row
 		html += '<tr>';
 		// Cover art
-		html += `<td class='overflow-protect fit-cell'><img src='${coverSrc}' alt='' loading='lazy' class='image-asset-inline' /></td>`;
+		html += `
+    <td class='overflow-protect fit-cell'>
+    	<img
+    		src='${coverSrc}'
+    		data-img-src='${coverSrc}'
+    		alt=''
+    		loading='lazy'
+    		class='image-asset-inline'
+    	/>
+    </td>`;
 		// Disc art
-		html += `<td class='overflow-protect fit-cell'><img src='${discSrc}' alt='' loading='lazy' class='image-asset-inline' /></td>`;
+		html += `
+		<td class='overflow-protect fit-cell'>
+			<img
+				src='${discSrc}'
+				data-img-src='${discSrc}'
+				alt=''
+				loading='lazy'
+				class='image-asset-inline'
+			/>
+		</td>`;
 		// ID
 		html += `<td class='mono'>${game.id}</td>`;
 		// Name
@@ -372,6 +390,53 @@ function renderTable() {
 	html += `</tbody></table>`;
 
 	areaElement.innerHTML = html;
+
+	attachImageEventListeners();
+}
+
+function attachImageEventListeners() {
+	const images = document.querySelectorAll('.image-asset-inline');
+	images.forEach(img => {
+		img.addEventListener('mouseover', /*** @param {MouseEvent} event */ function (event) {
+			const src = this.getAttribute('data-img-src');
+			handleImgMouseOver(src, event);
+		});
+
+		img.addEventListener('mouseout', function () {
+			handleImgMouseOut();
+		});
+	});
+}
+
+// Hover effect for images
+let hoverTimeout;
+
+/**
+ * Handle mouse over event for images
+ * @param {string} src - The source URL of the image
+ * @param {MouseEvent} event
+ */
+function handleImgMouseOver(src, event) {
+	clearTimeout(hoverTimeout);
+	hoverTimeout = setTimeout(() => {
+		const tooltip = document.getElementById('imgTooltip');
+		tooltip.innerHTML = `<img src='${src}' alt='' class='img-tooltip-preview' />`;
+		tooltip.style.left = (event.pageX + 20) + 'px';
+		tooltip.style.top = (event.pageY + 20) + 'px';
+		tooltip.style.display = 'block';
+	}, 300);
+}
+
+function handleImgMouseOut() {
+	clearTimeout(hoverTimeout);
+	hideImgTooltip();
+}
+
+function hideImgTooltip() {
+	const tooltip = document.getElementById('imgTooltip');
+	if (tooltip) {
+		tooltip.style.display = 'none';
+	}
 }
 
 /**

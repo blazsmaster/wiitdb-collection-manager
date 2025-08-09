@@ -57,6 +57,11 @@
       <b>Stats:</b> 0 games
     </div>
 
+    <div
+      id='imgTooltip'
+      class='img-tooltip'
+    ></div>
+
     <!-- Filters -->
     <div>
       <label>

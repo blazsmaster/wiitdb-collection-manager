@@ -30,4 +30,20 @@ th, td {
 
 .image-asset-inline {
   height: 40px;
+  cursor: pointer;
+}
+
+.img-tooltip {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  border: 2px solid #333;
+  background: #FFF;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.img-tooltip-preview {
+  display: block;
+  zoom: 1.35;
 }
