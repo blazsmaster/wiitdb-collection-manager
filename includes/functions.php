@@ -100,6 +100,12 @@
     }
 
     function getGameAssetPath($gameId, $assetType) {
+        if (empty($gameId) || !in_array($assetType, ['cover', 'disc'])) {
+            return '';
+        }
+
+        $regionCode = substr($gameId, 3, 1);
+
         // Region priority mapping - stats from [stats/get_asset_region_codes.sh]
         $regionMapping = [
             'A' => ['EN', 'US', 'JA', 'ES', 'FR', 'IT'],
@@ -134,4 +140,24 @@
             '8' => ['EN'],
             '9' => ['DE']
         ];
+        $defaultRegions = ['EN', 'US', 'AU'];
+
+        $regionsToCheck = $regionMapping[$regionCode] ?? $defaultRegions;
+
+        if ($assetType === 'cover') {
+            $baseDir = COVER_URL_BASE;
+        } elseif ($assetType === 'disc') {
+            $baseDir = DISC_URL_BASE;
+        } else {
+            return '';
+        }
+
+        foreach ($regionsToCheck as $region) {
+            $imagePath = $baseDir . $region . '/' . $gameId . '.png';
+            if (file_exists($imagePath)) {
+                return str_replace(BASE_PATH . '/', '', $imagePath);
+            }
+        }
+
+        return '';
     }
