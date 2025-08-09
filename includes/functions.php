@@ -98,3 +98,40 @@
             }
         }
     }
+
+    function getGameAssetPath($gameId, $assetType) {
+        // Region priority mapping - stats from [stats/get_asset_region_codes.sh]
+        $regionMapping = [
+            'A' => ['EN', 'US', 'JA', 'ES', 'FR', 'IT'],
+            'B' => ['EN', 'US'],
+            'C' => ['ZH', 'JA', 'KO', 'EN', 'US', 'FR', 'IT'],
+            'D' => ['DE', 'EN', 'CH', 'ES', 'FR', 'IT', 'DK', 'FI', 'NL', 'NO', 'SE'],
+            'E' => ['US', 'EN', 'DE', 'ES', 'FR', 'IT', 'JA'],
+            'F' => ['FR', 'EN', 'AU', 'DE', 'ES', 'IT', 'NL'],
+            'G' => ['EN', 'DE'],
+            'H' => ['NL', 'EN', 'DE', 'FR', 'IT'],
+            'I' => ['IT', 'EN', 'AU', 'US', 'DE', 'ES', 'FR', 'JA', 'KO', 'NL'],
+            'J' => ['JA', 'US'],
+            'K' => ['KO', 'US'],
+            'L' => ['EN', 'FR', 'IT', 'US', 'JA'],
+            'M' => ['EN', 'US', 'DE', 'FR'],
+            'N' => ['US', 'JA'],
+            'O' => ['US'],
+            'P' => ['EN', 'AU', 'US', 'DE', 'FR', 'ES', 'IT', 'NL', 'SE', 'DK', 'FI', 'NO', 'CH', 'TR', 'PT', 'RU'],
+            'Q' => ['KO', 'JA', 'EN', 'US'],
+            'R' => ['RU', 'EN', 'US'],
+            'S' => ['ES', 'EN', 'AU', 'FR', 'DE', 'NL'],
+            'T' => ['KO', 'EN'],
+            'U' => ['AU', 'EN', 'DE', 'ES', 'FR', 'IT', 'DK', 'FI', 'NO', 'SE'],
+            'V' => ['EN', 'SE', 'DK', 'FI', 'NO'],
+            'W' => ['ZH', 'KO', 'DK', 'EN', 'FI', 'NO', 'SE'],
+            'X' => ['EN', 'AU', 'US', 'DE', 'ES', 'FR', 'IT', 'NL', 'DK', 'FI', 'NO', 'PT', 'SE', 'JA'],
+            'Y' => ['EN', 'AU', 'US', 'DE', 'ES', 'FR', 'IT', 'NL', 'DK', 'FI', 'NO', 'PT', 'SE', 'TR'],
+            'Z' => ['EN', 'AU', 'US', 'DE', 'ES', 'FR', 'IT', 'KO', 'NL', 'DK', 'FI', 'NO', 'PT', 'SE', 'JA'],
+
+            '1' => ['EN', 'US'],
+            '4' => ['JA', 'US'],
+            '8' => ['EN'],
+            '9' => ['DE']
+        ];
+    }

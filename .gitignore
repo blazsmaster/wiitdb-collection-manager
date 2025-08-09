@@ -13,3 +13,7 @@ composer.lock
 
 # Vendor
 vendor/
+
+# Large image collections
+assets/images/cover/**
+assets/images/disc/**
