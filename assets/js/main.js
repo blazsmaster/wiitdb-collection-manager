@@ -368,12 +368,29 @@ function renderTable() {
 		html += `<td class='overflow-protect' style='max-width: 300px'>${game.name}</td>`;
 		// Region
 		html += `<td class='overflow-protect' style='white-space: nowrap'>${escapeUnknownStr(game.region)}</td>`;
+
 		// Languages
-		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.language)}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+
+		const languageAssets = getFlagSrc(game);
+		languageAssets.forEach((assetUrl) => {
+			html += `
+			<img
+				src='${assetUrl.url}'
+				alt='${assetUrl.code}'
+				title='${assetUrl.name} (${assetUrl.code})'
+				loading='lazy'
+				class='flag-smol-inline'
+			/>
+		`;
+		});
+
+		html += `</td>`;
+
 		// Developer
-		html += `<td class='overflow-protect' style='max-width: 200px'>${escapeUnknownStr(game.developer)}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.developer)}</td>`;
 		// Publisher
-		html += `<td class='overflow-protect' style='max-width: 200px'>${escapeUnknownStr(game.publisher)}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.publisher)}</td>`;
 
 		// Action buttons
 		html += `
@@ -392,6 +409,71 @@ function renderTable() {
 	areaElement.innerHTML = html;
 
 	attachImageEventListeners();
+}
+
+/**
+ * Get the source URL for a flag image
+ * @param {Game} game
+ */
+function getFlagSrc(game) {
+	/**
+	 * @type {LanguageSrc[]}
+	 */
+	const flagAssetUrls = [];
+
+	const langCodes = game.language.split(',').map((lang) => lang.trim());
+	langCodes.forEach((langCode) => {
+		let flagCode = langCode.toUpperCase();
+
+		const languageNames = {
+			DE: 'German',
+			DK: 'Danish',
+			EN: 'English',
+			ES: 'Spanish',
+			FI: 'Finnish',
+			FR: 'French',
+			GR: 'Greek',
+			IT: 'Italian',
+			JA: 'Japanese',
+			KO: 'Korean',
+			NL: 'Dutch',
+			NO: 'Norwegian',
+			PT: 'Portuguese',
+			RU: 'Russian',
+			SE: 'Swedish',
+			TR: 'Turkish',
+			ZHCN: 'Chinese (Simplified, Mainland China)',
+			ZHTW: 'Chinese (Traditional, Taiwan)',
+		};
+
+		// Map language codes to flag codes (asset names)
+		const flagMapping = {
+			EN: 'GB',
+			JA: 'JP',
+			KO: 'KR',
+			ZHCN: 'CN',
+			ZHTW: 'TW',
+		};
+
+		const langName = languageNames[langCode];
+		const regCode = game.id.charAt(3).toUpperCase();
+
+		if (flagCode === 'EN' && ['E', 'N'].includes(regCode)) {
+			flagCode = 'US';
+		} else if (flagCode === 'EN' && regCode === 'U') {
+			flagCode = 'AU';
+		} else if (flagMapping[flagCode]) {
+			flagCode = flagMapping[flagCode];
+		}
+
+		flagAssetUrls.push({
+			name: langName || '',
+			code: flagCode,
+			url: `assets/images/flags/${flagCode}_64.png`,
+		});
+	});
+
+	return flagAssetUrls;
 }
 
 function attachImageEventListeners() {

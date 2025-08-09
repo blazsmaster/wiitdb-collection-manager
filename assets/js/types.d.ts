@@ -30,5 +30,11 @@ interface Game {
 	type: string;
 }
 
+interface LanguageSrc {
+	name: string;
+	code: string;
+	url: string;
+}
+
 type MessageType = 'success' | 'error' | ''
 type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode'

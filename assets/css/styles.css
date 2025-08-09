@@ -60,3 +60,8 @@ th, td {
   max-height: 100%;
   object-fit: contain;
 }
+
+.flag-smol-inline {
+  height: 20px;
+  margin: 2px;
+}

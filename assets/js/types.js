@@ -33,3 +33,10 @@
  * @property {string} publisher
  * @property {string} type
  */
+
+/**
+ * @typedef {Object} LanguageSrc
+ * @property {string} name
+ * @property {string} code
+ * @property {string} url
+ */
