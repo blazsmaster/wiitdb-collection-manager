@@ -183,8 +183,8 @@ function matchesSearchTerm(game, field, searchTerm) {
 		return false;
 	}
 	if (field === 'developer' || field === 'publisher') {
-		const values = game[field].toLowerCase().split(',').map(v => v.trim());
-		return values.some(value => value.includes(searchTerm));
+		const values = parseAttributeString(game[field]);
+		return values.some(value => value.toLowerCase().includes(searchTerm));
 	}
 	if (field === 'name') {
 		return [game['name'], game['title']].join(' ').toLowerCase().includes(searchTerm);
@@ -205,17 +205,32 @@ function matchesFilter(game, filterType) {
 	}
 
 	const gameValue = game[filterType];
+	if (!gameValue) {
+		return activeValue === 'Unknown';
+	}
+
 	if (activeValue === 'Unknown') {
 		return !gameValue || gameValue.toLowerCase() === 'unknown';
 	}
 
-	if (filterType === 'language' && gameValue) {
+	if (filterType === 'language') {
 		return gameValue.toLowerCase().includes(activeValue.toLowerCase());
 	}
 
-	if ((filterType === 'developer' || filterType === 'publisher') && gameValue) {
-		const values = gameValue.split(',').map(v => v.trim());
-		return values.includes(activeValue);
+	if (filterType === 'developer' || filterType === 'publisher') {
+		const gameValues = gameValue.split(' / ').map(v => v.trim());
+		const activeValues = activeValue.split(' / ').map(v => v.trim());
+
+		return gameValues.some(gameVal => {
+			const gameValLower = gameVal.toLowerCase();
+			return activeValues.some(activeVal => {
+				const activeValLower = activeVal.toLowerCase();
+				if (gameValLower === activeValLower) {
+					return true;
+				}
+				return gameValLower.includes(activeValLower) || activeValLower.includes(gameValLower);
+			});
+		});
 	}
 
 	if (filterType === 'regionCode' && game.id) {
@@ -241,11 +256,30 @@ function updateStats() {
  */
 function populateDropdown(selectElement, options, selectedValue) {
 	const placeholder = selectElement.options[0];
+
+	const uniqueOptionsMap = new Map();
+
+	options.forEach(option => {
+		const lowerOption = option.trim().toLowerCase();
+		if (!uniqueOptionsMap.has(lowerOption) || option === selectedValue) {
+			uniqueOptionsMap.set(lowerOption, option);
+		}
+	});
+
 	selectElement.innerHTML = '';
 	selectElement.appendChild(placeholder);
 
-	const sortedOptions = [...options].filter(option => option !== 'Unknown');
-	sortedOptions.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+	const filteredOptions = Array.from(uniqueOptionsMap.values())
+		.filter(option => option !== 'Unknown' && option !== '...');
+
+	/**
+	 * @type {string[]}
+	 */
+	const sortedOptions = filteredOptions.sort((a, b) => {
+		const aStripped = a.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+		const bStripped = b.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+		return aStripped.localeCompare(bStripped);
+	});
 
 	if (options.includes('Unknown') && DISPLAY_UNKNOWN_FILTER) {
 		const unknownElement = document.createElement('option');
@@ -401,9 +435,24 @@ function renderTable(page = 1) {
 		html += `</td>`;
 
 		// Developer
-		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.developer)}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+		if (game.developer) {
+			const developers = game.developer.split(' / ').map(dev => dev.trim());
+			developers.forEach((dev, index) => {
+				html += `${escapeUnknownStr(dev)}${index < developers.length - 1 ? '<br>' : ''}`;
+			});
+		}
+		html += `</td>`;
+
 		// Publisher
-		html += `<td class='overflow-protect' style='max-width: 150px'>${escapeUnknownStr(game.publisher)}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+		if (game.publisher) {
+			const publishers = game.publisher.split(' / ').map(pub => pub.trim());
+			publishers.forEach((pub, index) => {
+				html += `${escapeUnknownStr(pub)}${index < publishers.length - 1 ? '<br>' : ''}`;
+			});
+		}
+		html += `</td>`;
 
 		// Action buttons
 		html += `
@@ -745,4 +794,49 @@ function debounce(func, delayMs) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => func.apply(ctx, args), delayMs);
 	};
+}
+
+/**
+ * Parse a string of attributes separated by slashes and commas
+ * @param {string} attrStr
+ */
+function parseAttributeString(attrStr) {
+	if (!attrStr) {
+		return [];
+	}
+	const companySuffixes = [
+		'Inc', 'Inc.',
+		'LLC',
+		'Ltd', 'Ltd.',
+		'Limited',
+		'Corp.', 'Corporation', 'Co.',
+		'Co., Ltd.', 'Co. Ltd.', 'Co Ltd',
+		'GmbH',
+		'S.A.B.',
+	];
+
+	const isCompanySuffix = (str) => companySuffixes.some(suffix => str.trim().toLowerCase() === suffix.toLowerCase());
+
+	const slashParts = attrStr.split('/').map(part => part.trim());
+	let values = [];
+
+	slashParts.forEach(part => {
+		const commaParts = part.split(',').map(p => p.trim());
+		let currentValue = '';
+		commaParts.forEach(commaPart => {
+			if (isCompanySuffix(commaPart) && currentValue) {
+				currentValue += ', ' + commaPart;
+			} else {
+				if (currentValue) {
+					values.push(currentValue);
+				}
+				currentValue = commaPart;
+			}
+		});
+		if (currentValue) {
+			values.push(currentValue);
+		}
+	});
+
+	return values.filter(Boolean);
 }

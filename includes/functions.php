@@ -47,14 +47,26 @@
                 processAttribute($developer, $filters['developer']);
                 processAttribute($publisher, $filters['publisher']);
 
+                // Join with slashes "/"
+                $developerModded = '';
+                $publisherModded = '';
+                $devParts = parseAttributeString($developer);
+                $pubParts = parseAttributeString($publisher);
+                if (count($devParts) > 0) {
+                    $developerModded = implode(' / ', $devParts);
+                }
+                if (count($pubParts) > 0) {
+                    $publisherModded = implode(' / ', $pubParts);
+                }
+
                 $games[] = [
                     'id' => $id,
                     'name' => $name,
                     'title' => $title,
                     'region' => $region,
                     'language' => $language,
-                    'developer' => $developer,
-                    'publisher' => $publisher,
+                    'developer' => $developerModded,
+                    'publisher' => $publisherModded,
                     'type' => $type
                 ];
             }
@@ -87,17 +99,78 @@
             $attrStr = 'Unknown';
         }
 
-        if ($splitCommas) {
-            $values = array_map('trim', explode(',', $attrStr));
-            foreach ($values as $value) {
-                if (!empty($value) && !in_array($value, $targetArr, true)) {
-                    $targetArr[] = $value;
+        if (!$splitCommas) {
+            addUniqueValue($attrStr, $targetArr);
+            return;
+        }
+
+        $values = parseAttributeString($attrStr);
+
+        foreach ($values as $value) {
+            addUniqueValue($value, $targetArr);
+        }
+    }
+
+    function parseAttributeString($attrStr): array {
+        $slashParts = array_map('trim', explode('/', $attrStr));
+        $values = [];
+
+        foreach ($slashParts as $part) {
+            $parsedValues = parseCommaDelimitedPart($part);
+            $values = array_merge($values, $parsedValues);
+        }
+
+        return $values;
+    }
+
+    function parseCommaDelimitedPart($part): array {
+        $commaParts = array_map('trim', explode(',', $part));
+        $values = [];
+        $currentValue = '';
+
+        foreach ($commaParts as $commaPart) {
+            if (isCompanySuffix($commaPart) && !empty($currentValue)) {
+                $currentValue .= ', ' . $commaPart;
+            } else {
+                if (!empty($currentValue)) {
+                    $values[] = $currentValue;
                 }
+                $currentValue = $commaPart;
             }
-        } else {
-            if (!in_array($attrStr, $targetArr, true)) {
-                $targetArr[] = $attrStr;
+        }
+
+        if (!empty($currentValue)) {
+            $values[] = $currentValue;
+        }
+
+        return $values;
+    }
+
+    function isCompanySuffix($str): bool {
+        // Must remain attached prefixes
+        $companySuffixes = [
+            'Inc', 'Inc.',
+            'LLC',
+            'Ltd', 'Ltd.',
+            'Limited',
+            'Corp.', 'Corporation', 'Co.',
+            'Co., Ltd.', 'Co. Ltd.', 'Co Ltd',
+            'GmbH',
+            'S.A.B.'
+        ];
+
+        foreach ($companySuffixes as $suffix) {
+            if (strcasecmp($str, $suffix) === 0) {
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    function addUniqueValue($value, &$targetArr) {
+        if (!empty($value) && !in_array($value, $targetArr, true)) {
+            $targetArr[] = $value;
         }
     }
 
