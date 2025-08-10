@@ -388,22 +388,14 @@ function renderTable(page = 1) {
 		// Name
 		html += `<td class='overflow-protect' style='max-width: 300px' title='${game.name}'>${game.title}</td>`;
 		// Region
-		html += `<td class='overflow-protect' style='white-space: nowrap'>${escapeUnknownStr(game.region)}</td>`;
+		html += `<td class='overflow-protect' style='white-space: nowrap'>${generateRegionFlagHtml(game)}</td>`;
 
 		// Languages
 		html += `<td class='overflow-protect' style='max-width: 150px'>`;
 
 		const languageAssets = getFlagSrc(game);
 		languageAssets.forEach((assetUrl) => {
-			html += `
-			<img
-				src='${assetUrl.url}'
-				alt='${assetUrl.code}'
-				title='${assetUrl.name} (${assetUrl.code})'
-				loading='lazy'
-				class='flag-smol-inline'
-			/>
-			`;
+			html += buildFlagElement(assetUrl.code, assetUrl.name, assetUrl.url);
 		});
 
 		html += `</td>`;
@@ -431,6 +423,73 @@ function renderTable(page = 1) {
 
 	attachImageEventListeners();
 	renderPagination(totalPages, currentPage);
+}
+
+/**
+ * Generate flag image element
+ * @param {Object} game
+ */
+function generateRegionFlagHtml(game) {
+	let html = '';
+
+	if (game.region.trim()) {
+		const regCode = game.id.charAt(3).toUpperCase();
+		const region = game.region.trim();
+
+		switch (region) {
+			case 'NTSC-J':
+				html += buildFlagElement('JP', game.region);
+				break;
+			case 'NTSC-K':
+				html += buildFlagElement('KR', game.region);
+				break;
+			case 'NTSC-T':
+				html += buildFlagElement('TW', game.region);
+				break;
+			case 'NTSC-U':
+				html += buildFlagElement('US', game.region);
+				break;
+			case 'PAL':
+				if (regCode === 'X') {
+					html += buildFlagElement('UN', 'Region Free', '', false);
+					html += buildFlagElement('EU', game.region);
+				} else if (regCode === 'D') {
+					html += buildFlagElement('DE', game.region);
+				} else if (regCode === 'F') {
+					html += buildFlagElement('FR', game.region);
+				} else if (regCode === 'I') {
+					html += buildFlagElement('IT', game.region);
+				} else if (regCode === 'S') {
+					html += buildFlagElement('ES', game.region);
+				} else {
+					html += buildFlagElement('EU', game.region);
+				}
+				break;
+			case 'PAL-R':
+				html += buildFlagElement('RU', game.region);
+				break;
+		}
+	}
+
+	return html;
+}
+
+/**
+ * Build a flag image element
+ * @param {string} code
+ * @param {string} name
+ * @param {string} url
+ * @param {boolean} displayCode - Whether to display the code in the tooltip (title)
+ */
+function buildFlagElement(code, name = '', url = '', displayCode = true) {
+	return `
+	<img
+		src='${url || `assets/images/flags/${code}_64.png`}'
+		alt='${code}'
+		title='${name}${displayCode ? ` (${code})` : ''}'
+		loading='lazy'
+		class='flag-smol-inline'
+	/>`;
 }
 
 /**
