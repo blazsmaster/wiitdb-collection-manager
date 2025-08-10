@@ -1,5 +1,5 @@
 :root {
-  --primary: oklch(0.744 0.156 234.305);
+  --primary-color: oklch(0.744 0.156 234.305);
   --secondary-color: oklch(0.982 0 89.876);
   --border-color: oklch(0.845 0 89.876);
   --border-dark-color: oklch(0.321 0 89.876);
@@ -64,4 +64,17 @@ th, td {
 .flag-smol-inline {
   height: 20px;
   margin: 2px;
+}
+
+.pagination-controls {
+  margin: 8px 0;
+}
+
+.pagination-controls button {
+  margin-right: 4px;
+}
+
+.pagination-controls button.current {
+  font-weight: bold;
+  background-color: var(--primary-color);
 }

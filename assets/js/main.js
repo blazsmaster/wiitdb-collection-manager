@@ -25,6 +25,7 @@ let activeFilters = {
 	publisher: '',
 	regionCode: '',
 };
+let currentPage = 1;
 
 // Storage keys
 const LS_GAME_DB_KEY = 'gameDB';
@@ -34,12 +35,15 @@ const LS_FILTERS_KEY = 'filters';
 const DEBOUNCE_DELAY = 300;
 const DISPLAY_UNKNOWN_FILTER = true;
 const MESSAGE_TIMEOUT_MS = 5000;
+const PAGINATION_TABLE_ROWS = 100;
 
 // UI
 const messageElement = document.getElementById('message');
 const loadingElement = document.getElementById('loading');
 const statsElement = document.getElementById('stats');
 const areaElement = document.getElementById('area');
+const paginationTopElement = document.getElementById('paginationTop');
+const paginationBottomElement = document.getElementById('paginationBottom');
 
 // UI Filters
 const regionFilterElement = document.getElementById('regionFilter');
@@ -309,11 +313,24 @@ function calculateFilterOptions() {
 	localStorage.setItem(LS_FILTERS_KEY, JSON.stringify(filters));
 }
 
-function renderTable() {
+/**
+ * Render the game table
+ * @param {number} page
+ */
+function renderTable(page = 1) {
+	currentPage = page;
+
 	if (db.length === 0) {
 		areaElement.innerHTML = '<p><i>No games loaded. Importing XML data...</i></p>';
+		paginationTopElement.innerHTML = '';
+		paginationBottomElement.innerHTML = '';
 		return;
 	}
+
+	const startIndex = (currentPage - 1) * PAGINATION_TABLE_ROWS;
+	const endIndex = Math.min(startIndex + PAGINATION_TABLE_ROWS, filteredGames.length);
+	const totalPages = Math.ceil(filteredGames.length / PAGINATION_TABLE_ROWS);
+	const displayGames = filteredGames.slice(startIndex, endIndex);
 
 	// Table generator start
 	let html = `
@@ -334,7 +351,7 @@ function renderTable() {
 	  <tbody>
 	`;
 
-	for (const game of filteredGames) {
+	for (const game of displayGames) {
 		const coverSrc = `index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`;
 		const discSrc = `index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`;
 
@@ -382,7 +399,7 @@ function renderTable() {
 				loading='lazy'
 				class='flag-smol-inline'
 			/>
-		`;
+			`;
 		});
 
 		html += `</td>`;
@@ -409,6 +426,44 @@ function renderTable() {
 	areaElement.innerHTML = html;
 
 	attachImageEventListeners();
+	renderPagination(totalPages, currentPage);
+}
+
+/**
+ * Render pagination controls
+ * @param {number} totalPages
+ * @param {number} currentPage
+ */
+function renderPagination(totalPages, currentPage) {
+	if (totalPages <= 1) {
+		paginationTopElement.innerHTML = '';
+		paginationBottomElement.innerHTML = '';
+		return;
+	}
+
+	let html = '<div class="pagination-controls">';
+
+	if (currentPage > 1) {
+		html += `<button onclick='renderTable(${currentPage - 1})'>&lt; Prev</button>`;
+	}
+
+	if (currentPage < totalPages) {
+		html += `<button onclick='renderTable(${currentPage + 1})'>Next &gt;</button>`;
+	}
+
+	const startPage = Math.max(1, currentPage - 5);
+	const endPage = Math.min(totalPages, startPage + 9);
+
+	for (let page = startPage; page <= endPage; page++) {
+		const className = page === currentPage ? 'current' : '';
+		html += `<button class='${className}' onclick='renderTable(${page})'>${page}</button>`;
+	}
+
+	html += `<span class='pagination-info'>Page ${currentPage} of ${totalPages}</span>`;
+	html += '</div>';
+
+	paginationTopElement.innerHTML = html;
+	paginationBottomElement.innerHTML = html;
 }
 
 /**

@@ -109,9 +109,13 @@
     </div>
     <!-- End Filters -->
 
+    <div id='paginationTop'></div>
+
     <div id='area'>
       <p><i>Loading game data...</i></p>
     </div>
+
+    <div id='paginationBottom'></div>
   </body>
   <script src='assets/js/main.js'></script>
 </html>
