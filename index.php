@@ -49,12 +49,111 @@
     >
   </head>
   <body>
-    <h2><?php echo SITE_TITLE; ?></h2>
+    <div class='container'>
+      <div
+        class='sub-container'
+        style='text-align: center;'
+      >
+        <h1><?php echo SITE_TITLE; ?></h1>
+        <div id='stats'>
+          <b>Stats:</b> 0 games
+        </div>
 
-    <div id='message'></div>
-    <div id='loading'>Loading data, please wait...</div>
-    <div id='stats'>
-      <b>Stats:</b> 0 games
+        <div id='message'></div>
+        <div id='loading'>Loading data, please wait...</div>
+      </div>
+      <div class='sub-container'>
+        <div>
+          <table class='filter-table'>
+            <thead>
+              <tr>
+                <th colspan='2'>Search for:</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input
+                    type='text'
+                    id='searchInput'
+                    placeholder='Query here :D'
+                  />
+
+                  <label for='searchField'>in </label><select id='searchField'>
+                    <option value='name'>Name</option>
+                    <option
+                      value='id'
+                      selected
+                    >
+                      ID
+                    </option>
+                    <option value='developer'>Developer</option>
+                    <option value='publisher'>Publisher</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <table class='filter-table'>
+          <thead>
+            <tr>
+              <th colspan='2'>Filter by:</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Region:</td>
+              <td>
+                <select id='regionFilter'>
+                  <option value=''>All Regions</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Language:</td>
+              <td>
+                <select id='languageFilter'>
+                  <option value=''>All Languages</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Developer:</td>
+              <td>
+                <select id='developerFilter'>
+                  <option value=''>All Developers</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Publisher:</td>
+              <td>
+                <select id='publisherFilter'>
+                  <option value=''>All Publishers</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Region Code:</td>
+              <td>
+                <select id='regionCodeFilter'>
+                  <option value=''>All Region Codes</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <label>
+            <input
+              type='checkbox'
+              id='hideDemo'
+            />
+            Hide demo titles
+          </label>
+        </div>
+      </div>
     </div>
 
     <div
@@ -62,60 +161,13 @@
       class='img-tooltip'
     ></div>
 
-    <!-- Filters -->
-    <div>
-      <label>
-        <input
-          type='checkbox'
-          id='hideDemo'
-        />
-        Hide demo titles
-      </label>
-    </div>
-    <div>
-      <input
-        type='text'
-        id='searchInput'
-        placeholder='Search...'
-      />
-      <select id='searchField'>
-        <option value='name'>Name</option>
-        <option
-          value='id'
-          selected
-        >
-          ID
-        </option>
-        <option value='developer'>Developer</option>
-        <option value='publisher'>Publisher</option>
-      </select>
-    </div>
-    <div>
-      <select id='regionFilter'>
-        <option value=''>All Regions</option>
-      </select>
-      <select id='languageFilter'>
-        <option value=''>All Languages</option>
-      </select>
-      <select id='developerFilter'>
-        <option value=''>All Developers</option>
-      </select>
-      <select id='publisherFilter'>
-        <option value=''>All Publishers</option>
-      </select>
-      <select id='regionCodeFilter'>
-        <option value=''>All Region Codes</option>
-      </select>
-    </div>
-    <!-- End Filters -->
-
+    <!-- Main -->
     <div id='paginationTop'></div>
-
     <div id='area'>
       <p><i>Loading game data...</i></p>
     </div>
-
     <div id='paginationBottom'></div>
+    <!-- End Main -->
   </body>
   <script src='assets/js/main.js'></script>
 </html>

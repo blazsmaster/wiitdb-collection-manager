@@ -1,6 +1,7 @@
 :root {
   --primary-color: oklch(0.744 0.156 234.305);
   --secondary-color: oklch(0.982 0 89.876);
+  --danger-color: oklch(0.563 0.154 23.878);
   --border-color: oklch(0.845 0 89.876);
   --border-dark-color: oklch(0.321 0 89.876);
 }
@@ -77,4 +78,48 @@ th, td {
 .pagination-controls button.current {
   font-weight: bold;
   background-color: var(--primary-color);
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+input, button, select {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+}
+
+select:focus, input:focus, button:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+input[type=checkbox]:checked {
+  accent-color: var(--primary-color);
+  color: white;
+}
+
+.filter-table {
+  border-collapse: collapse;
+  border-color: transparent;
+}
+
+.filter-table th, .filter-table td {
+  padding: 4px;
+  border: none;
+}
+
+.sub-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  cursor: pointer;
 }

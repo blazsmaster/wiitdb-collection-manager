@@ -338,7 +338,7 @@ function renderTable(page = 1) {
 
 	// Table generator start
 	let html = `
-	<table>
+	<table style='${totalPages <= 1 ? 'margin-top: 36px' : ''}'>
 	  <thead>
 	    <tr>
 	    	<th></th>
@@ -408,7 +408,7 @@ function renderTable(page = 1) {
 		// Action buttons
 		html += `
     <td>
-			<button class='btn' onclick='deleteGame("${game.id}", "${game.name}")'>Delete</button>
+			<button class='btn-danger' onclick='deleteGame("${game.id}", "${game.name}")'>Delete</button>
 		</td>
 		`;
 
@@ -506,13 +506,8 @@ function renderPagination(totalPages, currentPage) {
 
 	let html = '<div class="pagination-controls">';
 
-	if (currentPage > 1) {
-		html += `<button onclick='renderTable(${currentPage - 1})'>&lt; Prev</button>`;
-	}
-
-	if (currentPage < totalPages) {
-		html += `<button onclick='renderTable(${currentPage + 1})'>Next &gt;</button>`;
-	}
+	html += `<button onclick='renderTable(${currentPage - 1})' ${currentPage <= 1 ? 'disabled' : ''}>&lt; Prev</button>`;
+	html += `<button onclick='renderTable(${currentPage + 1})' ${currentPage >= totalPages ? 'disabled' : ''}>Next &gt;</button>`;
 
 	const startPage = Math.max(1, currentPage - 5);
 	const endPage = Math.min(totalPages, startPage + 9);
