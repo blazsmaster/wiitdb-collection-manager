@@ -27,6 +27,7 @@
  * @typedef {Object} Game
  * @property {string} id
  * @property {string} name
+ * @property {string} title
  * @property {string} region
  * @property {string} language
  * @property {string} developer

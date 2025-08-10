@@ -23,6 +23,7 @@ interface ActiveFilter {
 interface Game {
 	id: string;
 	name: string;
+	title: string;
 	region: string;
 	language: string;
 	developer: string;

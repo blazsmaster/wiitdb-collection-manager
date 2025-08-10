@@ -186,7 +186,11 @@ function matchesSearchTerm(game, field, searchTerm) {
 		const values = game[field].toLowerCase().split(',').map(v => v.trim());
 		return values.some(value => value.includes(searchTerm));
 	}
-	return game[field].toLowerCase().includes(searchTerm);
+	if (field === 'name') {
+		return [game['name'], game['title']].join(' ').toLowerCase().includes(searchTerm);
+	} else {
+		return game[field].toLowerCase().includes(searchTerm);
+	}
 }
 
 /**
@@ -382,7 +386,7 @@ function renderTable(page = 1) {
 		// ID
 		html += `<td class='mono'>${game.id}</td>`;
 		// Name
-		html += `<td class='overflow-protect' style='max-width: 300px'>${game.name}</td>`;
+		html += `<td class='overflow-protect' style='max-width: 300px' title='${game.name}'>${game.title}</td>`;
 		// Region
 		html += `<td class='overflow-protect' style='white-space: nowrap'>${escapeUnknownStr(game.region)}</td>`;
 
