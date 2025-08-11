@@ -57,6 +57,12 @@ const searchFieldElement = document.getElementById('searchField');
 const hideDemoElement = document.getElementById('hideDemo');
 const regionCodeFilterElement = document.getElementById('regionCodeFilter');
 const systemTypeFilterElement = document.getElementById('systemTypeFilter');
+const hideServiceElement = document.getElementById('hideService');
+const hideCustomElement = document.getElementById('hideCustom');
+const hideIncompleteElement = document.getElementById('hideIncomplete');
+const hideVirtualConsoleElement = document.getElementById('hideVirtualConsole');
+const hideWiiWareElement = document.getElementById('hideWiiWare');
+const hideHomebrewElement = document.getElementById('hideHomebrew');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
@@ -65,6 +71,12 @@ searchInputElement.addEventListener('input', debounce(applyFilters, DEBOUNCE_DEL
 searchFieldElement.addEventListener('change', applyFilters);
 
 hideDemoElement.addEventListener('change', applyFilters);
+hideServiceElement.addEventListener('change', applyFilters);
+hideCustomElement.addEventListener('change', applyFilters);
+hideIncompleteElement.addEventListener('change', applyFilters);
+hideVirtualConsoleElement.addEventListener('change', applyFilters);
+hideWiiWareElement.addEventListener('change', applyFilters);
+hideHomebrewElement.addEventListener('change', applyFilters);
 
 regionFilterElement.addEventListener('change', function () {
 	activeFilters.region = this.value;
@@ -147,14 +159,28 @@ function applyFilters() {
 	const searchTerm = searchInputElement.value.toLowerCase();
 	const searchField = searchFieldElement.value;
 	const hideDemo = hideDemoElement.checked;
+	const hideService = hideServiceElement.checked;
+	const hideCustom = hideCustomElement.checked;
+	const hideIncomplete = hideIncompleteElement.checked;
+	const hideVirtualConsole = hideVirtualConsoleElement.checked;
+	const hideWiiWare = hideWiiWareElement.checked;
+	const hideHomebrew = hideHomebrewElement.checked;
 
 	filteredGames = db.filter((game) => {
-		if (hideDemo && isMatchingDemo(game)) {
+		const gameType = game.type.toLowerCase();
+		if (
+			(hideCustom && gameType === 'custom') ||
+			(hideVirtualConsole && gameType.startsWith('vc-')) ||
+			(hideWiiWare && gameType === 'wiiware') ||
+			(hideHomebrew && gameType === 'homebrew') ||
+			(hideDemo && isMatchingDemo(game)) ||
+			(hideService && isServiceTitle(game)) ||
+			(hideIncomplete && hasUnknownValue(game)) ||
+			(searchTerm && searchField && !matchesSearchTerm(game, searchField, searchTerm))
+		) {
 			return false;
 		}
-		if (searchTerm && searchField && !matchesSearchTerm(game, searchField, searchTerm)) {
-			return false;
-		}
+
 		return matchesFilter(game, 'region') &&
 			matchesFilter(game, 'language') &&
 			matchesFilter(game, 'developer') &&
@@ -165,6 +191,23 @@ function applyFilters() {
 
 	updateStats();
 	renderTable();
+}
+
+/**
+ * Check if a game has unknown value in any of its fields
+ * @param {Game} game
+ */
+function hasUnknownValue(game) {
+	return !game.region || !game.language || !game.developer || !game.publisher || !game.type;
+}
+
+/**
+ * Check if a game is a service title
+ * @param {Game} game
+ */
+function isServiceTitle(game) {
+	const discCode = game.id.charAt(0).toUpperCase();
+	return !isNaN(parseInt(discCode)) && (game.type === 'Wii' || game.type === 'GameCube');
 }
 
 /**
@@ -442,12 +485,30 @@ function renderTable(page = 1) {
 		// ID
 		html += `<td class='mono'>${game.id}</td>`;
 		// Name
-		html += `<td class='overflow-protect' style='max-width: 300px' title='${game.name}'>${game.title}</td>`;
+		html += `
+		<td
+			class='overflow-protect ${ifEmpty(game.name, 'bg-cell-danger')}'
+			style='max-width: 300px'
+			title='${game.name}'
+		>
+			${game.title}
+		</td>`;
 		// Region
-		html += `<td class='overflow-protect' style='white-space: nowrap'>${generateRegionFlagHtml(game)}</td>`;
+		html += `
+		<td
+			class='overflow-protect ${ifEmpty(game.region, 'bg-cell-danger')}'
+			style='white-space: nowrap'
+		>
+			${generateRegionFlagHtml(game)}
+		</td>`;
 
 		// Languages
-		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+		html += `
+		<td
+			class='overflow-protect ${ifEmpty(game.language, 'bg-cell-danger')}'
+			style='max-width: 150px'
+		>`;
+
 
 		const languageAssets = getFlagSrc(game);
 		languageAssets.forEach((assetUrl) => {
@@ -457,7 +518,11 @@ function renderTable(page = 1) {
 		html += `</td>`;
 
 		// Developer
-		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+		html += `
+		<td
+			class='overflow-protect ${ifEmpty(game.developer, 'bg-cell-danger')}'
+			style='max-width: 150px'
+		>`;
 		if (game.developer) {
 			const developers = game.developer.split(' / ').map(dev => dev.trim());
 			developers.forEach((dev, index) => {
@@ -467,7 +532,11 @@ function renderTable(page = 1) {
 		html += `</td>`;
 
 		// Publisher
-		html += `<td class='overflow-protect' style='max-width: 150px'>`;
+		html += `
+		<td
+			class='overflow-protect ${ifEmpty(game.publisher, 'bg-cell-danger')}'
+			style='max-width: 150px'
+		>`;
 		if (game.publisher) {
 			const publishers = game.publisher.split(' / ').map(pub => pub.trim());
 			publishers.forEach((pub, index) => {
@@ -886,4 +955,13 @@ function parseAttributeString(attrStr) {
 	});
 
 	return values.filter(Boolean);
+}
+
+/**
+ * Check if a value is empty and return a default value if it is
+ * @param {string} value
+ * @param {string} defaultValue
+ */
+function ifEmpty(value, defaultValue) {
+	return value.trim() === '' ? defaultValue : value;
 }

@@ -130,3 +130,11 @@ input[type=checkbox]:checked {
   border: none;
   cursor: pointer;
 }
+
+table[class="filter-table"] input[type='checkbox'] {
+  margin-left: 0;
+}
+
+.bg-cell-danger {
+  background-color: color-mix(in oklch, var(--danger-color) 10%, transparent);
+}

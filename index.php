@@ -149,14 +149,83 @@
                   <option value=''>All Systems</option>
               </td>
             </tr>
+          </tbody>
+        </table>
+        <table class='filter-table'>
+          <thead>
             <tr>
-              <td colspan='2'>
+              <th colspan='3'>Advanced Filters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
                 <label>
                   <input
                     type='checkbox'
                     id='hideDemo'
                   />
                   Hide demo titles
+                </label>
+              </td>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideHomebrew'
+                  />
+                  Hide Homebrew channels
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideService'
+                  />
+                  Hide service titles
+                </label>
+              </td>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideVirtualConsole'
+                  />
+                  Hide Virtual Console titles
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideCustom'
+                  />
+                  Hide custom titles
+                </label>
+              </td>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideWiiWare'
+                  />
+                  Hide WiiWare titles
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideIncomplete'
+                  />
+                  Hide incomplete titles
                 </label>
               </td>
             </tr>
