@@ -69,10 +69,17 @@ th, td {
 
 .pagination-controls {
   margin: 8px 0;
+  width: 100%;
+  display: flex;
 }
 
 .pagination-controls button {
   margin-right: 4px;
+}
+
+.pagination-controls button.jumper {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .pagination-controls button.current {

@@ -41,3 +41,4 @@ interface LanguageSrc {
 
 type MessageType = 'success' | 'error' | ''
 type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode' | 'type'
+type JumpPosition = 'top' | 'bottom'

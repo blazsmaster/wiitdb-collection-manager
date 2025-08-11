@@ -338,6 +338,7 @@ function calculateFilterOptions() {
 	let languages = new Set();
 	let developers = new Set();
 	let publishers = new Set();
+	let systemTypes = new Set();
 
 	for (const game of db) {
 		if (game.region) {
@@ -352,6 +353,9 @@ function calculateFilterOptions() {
 		if (game.publisher) {
 			publishers.add(game.publisher);
 		}
+		if (game.type) {
+			systemTypes.add(game.type);
+		}
 	}
 
 	filters = {
@@ -359,6 +363,7 @@ function calculateFilterOptions() {
 		language: Array.from(languages).sort(),
 		developer: Array.from(developers).sort(),
 		publisher: Array.from(publishers).sort(),
+		type: Array.from(systemTypes).sort(),
 	};
 
 	localStorage.setItem(LS_FILTERS_KEY, JSON.stringify(filters));
@@ -385,7 +390,7 @@ function renderTable(page = 1) {
 
 	// Table generator start
 	let html = `
-	<table style='${totalPages <= 1 ? 'margin-top: 36px' : ''}'>
+	<table>
 	  <thead>
 	    <tr>
 	    	<th></th>
@@ -481,6 +486,10 @@ function renderTable(page = 1) {
 	// Fix table generator end
 	html += `</tbody></table>`;
 
+	if (displayGames.length === 0) {
+		html += '<p style="text-align: center"><i>No games found matching the current filters, please adjust your filters. :(</i></p>';
+	}
+
 	areaElement.innerHTML = html;
 
 	attachImageEventListeners();
@@ -560,30 +569,51 @@ function buildFlagElement(code, name = '', url = '', displayCode = true) {
  * @param {number} currentPage
  */
 function renderPagination(totalPages, currentPage) {
-	if (totalPages <= 1) {
-		paginationTopElement.innerHTML = '';
-		paginationBottomElement.innerHTML = '';
-		return;
-	}
+	const scrollingEnabled = document.body.scrollHeight > window.innerHeight + 20;
 
 	let html = '<div class="pagination-controls">';
 
-	html += `<button onclick='renderTable(${currentPage - 1})' ${currentPage <= 1 ? 'disabled' : ''}>&lt; Prev</button>`;
-	html += `<button onclick='renderTable(${currentPage + 1})' ${currentPage >= totalPages ? 'disabled' : ''}>Next &gt;</button>`;
+	if (totalPages > 1) {
+		html += `<button onclick='renderTable(${currentPage - 1})' ${currentPage <= 1 ? 'disabled' : ''}>&lt; Prev</button>`;
+		html += `<button onclick='renderTable(${currentPage + 1})' ${currentPage >= totalPages ? 'disabled' : ''}>Next &gt;</button>`;
 
-	const startPage = Math.max(1, currentPage - 5);
-	const endPage = Math.min(totalPages, startPage + 9);
+		const startPage = Math.max(1, currentPage - 5);
+		const endPage = Math.min(totalPages, startPage + 9);
 
-	for (let page = startPage; page <= endPage; page++) {
-		const className = page === currentPage ? 'current' : '';
-		html += `<button class='${className}' onclick='renderTable(${page})'>${page}</button>`;
+		for (let page = startPage; page <= endPage; page++) {
+			const className = page === currentPage ? 'current' : '';
+			html += `<button class='${className}' onclick='renderTable(${page})'>${page}</button>`;
+		}
+
+		html += `<span class='pagination-info'>Page ${currentPage} of ${totalPages}</span>`;
 	}
 
-	html += `<span class='pagination-info'>Page ${currentPage} of ${totalPages}</span>`;
+	if (scrollingEnabled) {
+		html += `<button class='jumper' onclick="jumpToPosition('bottom')">Jump to Bottom &darr;</button>`;
+	}
+
 	html += '</div>';
 
 	paginationTopElement.innerHTML = html;
-	paginationBottomElement.innerHTML = html;
+
+	let bottomHtml = html;
+	if (scrollingEnabled) {
+		bottomHtml = bottomHtml.replace('Jump to Bottom &darr;', 'Jump to Top &uarr;');
+		bottomHtml = bottomHtml.replace('onclick="jumpToPosition(\'bottom\')"', 'onclick="jumpToPosition(\'top\')"');
+	}
+
+	paginationBottomElement.innerHTML = bottomHtml;
+}
+
+/**
+ * @param {JumpPosition} position
+ */
+function jumpToPosition(position) {
+	if (position === 'top') {
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} else if (position === 'bottom') {
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+	}
 }
 
 /**
