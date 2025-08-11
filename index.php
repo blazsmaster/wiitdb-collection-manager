@@ -142,17 +142,26 @@
                 </select>
               </td>
             </tr>
+            <tr>
+              <td>System type:</td>
+              <td>
+                <select id='systemTypeFilter'>
+                  <option value=''>All Systems</option>
+              </td>
+            </tr>
+            <tr>
+              <td colspan='2'>
+                <label>
+                  <input
+                    type='checkbox'
+                    id='hideDemo'
+                  />
+                  Hide demo titles
+                </label>
+              </td>
+            </tr>
           </tbody>
         </table>
-        <div>
-          <label>
-            <input
-              type='checkbox'
-              id='hideDemo'
-            />
-            Hide demo titles
-          </label>
-        </div>
       </div>
     </div>
 

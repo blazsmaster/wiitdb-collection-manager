@@ -8,7 +8,8 @@
                 'region' => [],
                 'language' => [],
                 'developer' => [],
-                'publisher' => []
+                'publisher' => [],
+                'type' => []
             ]
         ];
 
@@ -29,7 +30,8 @@
                 'region' => [],
                 'language' => [],
                 'developer' => [],
-                'publisher' => []
+                'publisher' => [],
+                'type' => []
             ];
 
             foreach ($xml -> game as $game) {
@@ -42,10 +44,15 @@
                 $publisher = (string)$game -> publisher;
                 $type = (string)$game -> type;
 
+                if (empty($type)) {
+                    $type = 'Wii';
+                }
+
                 processAttribute($region, $filters['region'], false);
                 processAttribute($language, $filters['language']);
                 processAttribute($developer, $filters['developer']);
                 processAttribute($publisher, $filters['publisher']);
+                processAttribute($type, $filters['type'], false);
 
                 // Join with slashes "/"
                 $developerModded = '';
@@ -75,6 +82,7 @@
             sort($filters['language']);
             sort($filters['developer']);
             sort($filters['publisher']);
+            sort($filters['type']);
             usort($games, function ($a, $b) {
                 return strcmp($a['id'], $b['id']);
             });

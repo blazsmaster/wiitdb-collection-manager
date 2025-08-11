@@ -12,6 +12,7 @@
  * @property {string[]} language
  * @property {string[]} developer
  * @property {string[]} publisher
+ * @property {string[]} type
  */
 
 /**
@@ -21,6 +22,7 @@
  * @property {string} developer - Selected developer
  * @property {string} publisher - Selected publisher
  * @property {string} regionCode - Selected region code
+ * @property {string} type - Selected system type
  */
 
 /**

@@ -10,6 +10,7 @@ interface Filter {
 	language: string[];
 	developer: string[];
 	publisher: string[];
+	type: string[];
 }
 
 interface ActiveFilter {
@@ -18,6 +19,7 @@ interface ActiveFilter {
 	developer: string;
 	publisher: string;
 	regionCode: string;
+	type: string;
 }
 
 interface Game {
@@ -38,4 +40,4 @@ interface LanguageSrc {
 }
 
 type MessageType = 'success' | 'error' | ''
-type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode'
+type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode' | 'type'

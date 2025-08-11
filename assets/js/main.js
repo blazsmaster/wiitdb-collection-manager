@@ -14,6 +14,7 @@ let filters = {
 	language: [],
 	developer: [],
 	publisher: [],
+	type: [],
 };
 /**
  * @type {ActiveFilter}
@@ -24,6 +25,7 @@ let activeFilters = {
 	developer: '',
 	publisher: '',
 	regionCode: '',
+	type: '',
 };
 let currentPage = 1;
 
@@ -54,6 +56,7 @@ const searchInputElement = document.getElementById('searchInput');
 const searchFieldElement = document.getElementById('searchField');
 const hideDemoElement = document.getElementById('hideDemo');
 const regionCodeFilterElement = document.getElementById('regionCodeFilter');
+const systemTypeFilterElement = document.getElementById('systemTypeFilter');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
@@ -81,6 +84,10 @@ publisherFilterElement.addEventListener('change', function () {
 });
 regionCodeFilterElement.addEventListener('change', function () {
 	activeFilters.regionCode = this.value;
+	applyFilters();
+});
+systemTypeFilterElement.addEventListener('change', function () {
+	activeFilters.type = this.value;
 	applyFilters();
 });
 
@@ -152,7 +159,8 @@ function applyFilters() {
 			matchesFilter(game, 'language') &&
 			matchesFilter(game, 'developer') &&
 			matchesFilter(game, 'publisher') &&
-			matchesFilter(game, 'regionCode');
+			matchesFilter(game, 'regionCode') &&
+			matchesFilter(game, 'type');
 	});
 
 	updateStats();
@@ -205,9 +213,6 @@ function matchesFilter(game, filterType) {
 	}
 
 	const gameValue = game[filterType];
-	if (!gameValue) {
-		return activeValue === 'Unknown';
-	}
 
 	if (activeValue === 'Unknown') {
 		return !gameValue || gameValue.toLowerCase() === 'unknown';
@@ -239,6 +244,13 @@ function matchesFilter(game, filterType) {
 			return false;
 		}
 		return regionCode === activeValue;
+	}
+
+	if (filterType === 'type') {
+		if (!game.type) {
+			return activeValue === 'Unknown';
+		}
+		return game.type === activeValue;
 	}
 
 	return gameValue === activeValue;
@@ -318,6 +330,7 @@ function populateFilterDropdowns() {
 		).sort(),
 		activeFilters.regionCode,
 	);
+	populateDropdown(systemTypeFilterElement, filters.type, activeFilters.type);
 }
 
 function calculateFilterOptions() {
