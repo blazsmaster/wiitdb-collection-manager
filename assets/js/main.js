@@ -218,6 +218,10 @@ function matchesFilter(game, filterType) {
 		return !gameValue || gameValue.toLowerCase() === 'unknown';
 	}
 
+	if (!gameValue || gameValue.trim() === '') {
+		return false;
+	}
+
 	if (filterType === 'language') {
 		return gameValue.toLowerCase().includes(activeValue.toLowerCase());
 	}
