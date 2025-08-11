@@ -145,3 +145,53 @@ button#clearFilter {
   display: none;
   cursor: pointer;
 }
+
+dialog {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.2);
+  padding: 8px;
+  overflow: hidden;
+}
+
+.dialog-container {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  padding: 8px;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+dialog img {
+  width: 160px;
+  object-fit: contain;
+  border: 1px solid var(--border-color);
+}
+
+dialog > div h3 {
+  margin: 0;
+}
+
+dialog .button-tray {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.button-tray button {
+  padding: 8px;
+  cursor: pointer;
+}
+
+dialog table {
+  width: 100%;
+  margin-bottom: auto;
+}

@@ -614,7 +614,7 @@ function renderTable(page = 1) {
 		// Action buttons
 		html += `
     <td>
-			<button class='btn-danger' id='del-${game.id}'>Delete</button>
+			<button class='btn-danger' onclick='showDeleteDialog("${game.id}")'>Delete</button>
 		</td>
 		`;
 
@@ -632,23 +632,79 @@ function renderTable(page = 1) {
 	areaElement.innerHTML = html;
 
 	attachImageEventListeners();
-	attachDeleteEventListeners();
 	renderPagination(totalPages, currentPage);
 }
 
-function attachDeleteEventListeners() {
-	const deleteButtons = document.querySelectorAll('button[id^="del-"]');
-	deleteButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
-			const gameId = event.target.id.replace('del-', '');
-			const game = db.find((g) => g.id === gameId);
-			if (game) {
-				deleteGame(game);
-			} else {
-				showMessage(`Game with ID ${gameId} not found.`, 'error');
-			}
+/**
+ * Show a native confirmation dialog for deleting a game
+ * @param {string} gameId
+ */
+function showDeleteDialog(gameId) {
+	const game = db.find(g => g.id === gameId);
+	if (!game) {
+		showMessage(`Game with ID ${gameId} not found.`, 'error');
+		return;
+	}
+
+	const existingDialog = document.getElementById(`dia-del-${gameId}`);
+	if (existingDialog) {
+		document.body.removeChild(existingDialog);
+	}
+
+	const dialog = document.createElement('dialog');
+	dialog.id = `dia-del-${gameId}`;
+	dialog.innerHTML = `
+	<div class='dialog-container'>
+		<img 
+			src='index.php?action=get_asset&type=cover&id=${encodeURIComponent(gameId)}'
+			alt=''
+			onerror="this.onerror=null; this.src='/assets/images/missing_cover.png';"
+		/>
+		<div class='dialog-body'>
+			<h3>Do you want to <span style='color: var(--danger-color)'>delete</span> this game?</h3>
+			<table>
+				<tbody>
+					<tr>
+						<td>Game ID:</td>
+						<td>${gameId}</td>
+					</tr>
+					<tr>
+						<td>Game Name:</td>
+						<td>${game.name}</td>
+					</tr>
+					<tr>
+						<td>System Type:</td>
+						<td>${game.type}</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class='button-tray'>
+				<button id='closeDeleteDialog-${gameId}'>Close</button>
+				<button class='btn-danger' id='confirmDeleteBtn-${gameId}'>DELETE</button>
+			</div>
+		</div>
+	</div>`;
+
+	document.body.appendChild(dialog);
+
+	const closeButton = document.getElementById(`closeDeleteDialog-${gameId}`);
+	if (closeButton) {
+		closeButton.addEventListener('click', () => {
+			dialog.close();
+			document.body.removeChild(dialog);
 		});
-	});
+	}
+
+	const confirmButton = document.getElementById(`confirmDeleteBtn-${gameId}`);
+	if (confirmButton) {
+		confirmButton.addEventListener('click', () => {
+			deleteGame(game);
+			dialog.close();
+			document.body.removeChild(dialog);
+		});
+	}
+
+	dialog.showModal();
 }
 
 /**
@@ -935,16 +991,14 @@ function hideImgTooltip() {
  * @param {Game} game
  */
 function deleteGame(game) {
-	const dia = confirm(`Are you sure you want to delete this game?\n\n"${game.name}" (ID: ${game.id})`);
-	if (dia) {
-		const gameIndex = db.findIndex((g) => g.id === game.id);
-		if (gameIndex !== -1) {
-			db.splice(gameIndex, 1);
-			localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
-
-			showMessage(`"${game.name}" (ID: ${game.id}) has been deleted successfully.`, 'success');
-			applyFilters();
-		}
+	const gameIndex = db.findIndex((g) => g.id === game.id);
+	if (gameIndex !== -1) {
+		db.splice(gameIndex, 1);
+		localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
+		showMessage(`"${game.name}" (ID: ${game.id}) has been deleted successfully.`, 'success');
+		applyFilters();
+	} else {
+		showMessage(`Game with ID ${game.id} not found.`, 'error');
 	}
 }
 
