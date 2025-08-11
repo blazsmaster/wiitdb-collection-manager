@@ -31,6 +31,7 @@ interface Game {
 	developer: string;
 	publisher: string;
 	type: string;
+	checked: boolean;
 }
 
 interface LanguageSrc {

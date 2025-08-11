@@ -497,6 +497,7 @@ function renderTable(page = 1) {
 	    <tr>
 	    	<th></th>
 	    	<th></th>
+	    	<th></th>
 	      <th>ID</th>
         <th>Name</th>
         <th>Region</th>
@@ -515,6 +516,16 @@ function renderTable(page = 1) {
 
 		// Start row
 		html += '<tr>';
+		// Checkbox
+		html += `
+		<td class='fit-cell'>
+			<input
+				type='checkbox'
+				${game.checked ? 'checked' : ''}
+				title='${game.checked ? 'Do I still want to keep this game?' : 'Do I own this game?'}'
+				onchange='toggleChecked("${game.id}")'
+			/>
+		</td>`;
 		// Cover art
 		html += `
     <td class='overflow-protect fit-cell'>
@@ -603,7 +614,7 @@ function renderTable(page = 1) {
 		// Action buttons
 		html += `
     <td>
-			<button class='btn-danger' onclick='deleteGame("${game.id}", "${game.name}")'>Delete</button>
+			<button class='btn-danger' id='del-${game.id}'>Delete</button>
 		</td>
 		`;
 
@@ -621,7 +632,36 @@ function renderTable(page = 1) {
 	areaElement.innerHTML = html;
 
 	attachImageEventListeners();
+	attachDeleteEventListeners();
 	renderPagination(totalPages, currentPage);
+}
+
+function attachDeleteEventListeners() {
+	const deleteButtons = document.querySelectorAll('button[id^="del-"]');
+	deleteButtons.forEach((button) => {
+		button.addEventListener('click', (event) => {
+			const gameId = event.target.id.replace('del-', '');
+			const game = db.find((g) => g.id === gameId);
+			if (game) {
+				deleteGame(game);
+			} else {
+				showMessage(`Game with ID ${gameId} not found.`, 'error');
+			}
+		});
+	});
+}
+
+/**
+ * Toggle the checked state of a game
+ * @param {string} gameId
+ */
+function toggleChecked(gameId) {
+	const index = db.findIndex((game) => game.id === gameId);
+	if (index !== -1) {
+		db[index].checked = !db[index].checked;
+		localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
+		applyFilters();
+	}
 }
 
 /**
@@ -892,18 +932,17 @@ function hideImgTooltip() {
 
 /**
  * Delete a game from the database
- * @param {string} gameId
- * @param {string} gameName
+ * @param {Game} game
  */
-function deleteGame(gameId, gameName) {
-	const dia = confirm(`Are you sure you want to delete this game?\n\n"${gameName}" (ID: ${gameId})`);
+function deleteGame(game) {
+	const dia = confirm(`Are you sure you want to delete this game?\n\n"${game.name}" (ID: ${game.id})`);
 	if (dia) {
-		const gameIndex = db.findIndex((g) => g.id === gameId);
+		const gameIndex = db.findIndex((g) => g.id === game.id);
 		if (gameIndex !== -1) {
 			db.splice(gameIndex, 1);
 			localStorage.setItem(LS_GAME_DB_KEY, JSON.stringify(db));
 
-			showMessage(`"${gameName}" (ID: ${gameId}) has been deleted successfully.`, 'success');
+			showMessage(`"${game.name}" (ID: ${game.id}) has been deleted successfully.`, 'success');
 			applyFilters();
 		}
 	}

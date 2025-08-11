@@ -74,7 +74,8 @@
                     'language' => $language,
                     'developer' => $developerModded,
                     'publisher' => $publisherModded,
-                    'type' => $type
+                    'type' => $type,
+                    'checked' => false
                 ];
             }
 

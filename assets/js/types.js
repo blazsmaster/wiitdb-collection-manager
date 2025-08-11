@@ -35,6 +35,7 @@
  * @property {string} developer
  * @property {string} publisher
  * @property {string} type
+ * @property {boolean} checked
  */
 
 /**
