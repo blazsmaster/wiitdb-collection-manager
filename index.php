@@ -91,6 +91,11 @@
                     <option value='publisher'>Publisher</option>
                   </select>
                 </td>
+                <td>
+                  <button id='clearFilter'>
+                    Clear Filters &cross;
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>

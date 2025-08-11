@@ -46,6 +46,7 @@ const statsElement = document.getElementById('stats');
 const areaElement = document.getElementById('area');
 const paginationTopElement = document.getElementById('paginationTop');
 const paginationBottomElement = document.getElementById('paginationBottom');
+const clearFilterButtonElement = document.getElementById('clearFilter');
 
 // UI Filters
 const regionFilterElement = document.getElementById('regionFilter');
@@ -66,6 +67,8 @@ const hideHomebrewElement = document.getElementById('hideHomebrew');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', initApp);
+
+clearFilterButtonElement.addEventListener('click', clearFilters);
 
 searchInputElement.addEventListener('input', debounce(applyFilters, DEBOUNCE_DELAY));
 searchFieldElement.addEventListener('change', applyFilters);
@@ -189,8 +192,60 @@ function applyFilters() {
 			matchesFilter(game, 'type');
 	});
 
+	clearFilterButtonElement.style.display = atLeastOneActiveFilter() ? 'inline-block' : 'none';
+
 	updateStats();
 	renderTable();
+}
+
+function clearFilters() {
+	activeFilters = {
+		region: '',
+		language: '',
+		developer: '',
+		publisher: '',
+		regionCode: '',
+		type: '',
+	};
+
+	searchInputElement.value = '';
+	searchFieldElement.value = 'id';
+
+	regionFilterElement.value = '';
+	languageFilterElement.value = '';
+	developerFilterElement.value = '';
+	publisherFilterElement.value = '';
+	regionCodeFilterElement.value = '';
+	systemTypeFilterElement.value = '';
+
+	hideDemoElement.checked = false;
+	hideServiceElement.checked = false;
+	hideCustomElement.checked = false;
+	hideIncompleteElement.checked = false;
+	hideVirtualConsoleElement.checked = false;
+	hideWiiWareElement.checked = false;
+	hideHomebrewElement.checked = false;
+
+	applyFilters();
+}
+
+function atLeastOneActiveFilter() {
+	return (
+		activeFilters.region ||
+		activeFilters.language ||
+		activeFilters.developer ||
+		activeFilters.publisher ||
+		activeFilters.regionCode ||
+		activeFilters.type ||
+		searchInputElement.value.trim() !== '' ||
+		hideDemoElement.checked ||
+		hideServiceElement.checked ||
+		hideCustomElement.checked ||
+		hideIncompleteElement.checked ||
+		hideVirtualConsoleElement.checked ||
+		hideWiiWareElement.checked ||
+		hideHomebrewElement.checked
+	);
 }
 
 /**

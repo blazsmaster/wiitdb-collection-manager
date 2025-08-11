@@ -110,6 +110,7 @@ input[type=checkbox]:checked {
 .filter-table {
   border-collapse: collapse;
   border-color: transparent;
+  width: 100%;
 }
 
 .filter-table th, .filter-table td {
@@ -137,4 +138,10 @@ table[class="filter-table"] input[type='checkbox'] {
 
 .bg-cell-danger {
   background-color: color-mix(in oklch, var(--danger-color) 10%, transparent);
+}
+
+button#clearFilter {
+  background-color: var(--primary-color);
+  display: none;
+  cursor: pointer;
 }
