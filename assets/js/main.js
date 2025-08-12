@@ -47,6 +47,9 @@ const areaElement = document.getElementById('area');
 const paginationTopElement = document.getElementById('paginationTop');
 const paginationBottomElement = document.getElementById('paginationBottom');
 const clearFilterButtonElement = document.getElementById('clearFilter');
+const helpDialogElement = document.getElementById('helpDialog');
+const helpButtonElement = document.getElementById('helpButton');
+const closeHelpButtonElement = document.getElementById('closeHelpDialog');
 
 // UI Filters
 const regionFilterElement = document.getElementById('regionFilter');
@@ -69,6 +72,27 @@ const hideHomebrewElement = document.getElementById('hideHomebrew');
 document.addEventListener('DOMContentLoaded', initApp);
 
 clearFilterButtonElement.addEventListener('click', clearFilters);
+
+helpButtonElement.addEventListener('click', function () {
+	helpDialogElement.showModal();
+});
+closeHelpButtonElement.addEventListener('click', function () {
+	helpDialogElement.close();
+});
+
+document.querySelectorAll('#helpDialog .btn').forEach(tab => {
+	tab.addEventListener('click', function () {
+		const targetTab = this.getAttribute('data-tab');
+		document.querySelectorAll('.tab-content').forEach(content => {
+			content.classList.remove('active');
+		});
+		document.querySelectorAll('#helpDialog .btn').forEach(t => {
+			t.classList.remove('active');
+		});
+		document.getElementById(targetTab + '-content').classList.add('active');
+		this.classList.add('active');
+	});
+});
 
 searchInputElement.addEventListener('input', debounce(applyFilters, DEBOUNCE_DELAY));
 searchFieldElement.addEventListener('change', applyFilters);
@@ -316,7 +340,7 @@ function matchesFilter(game, filterType) {
 		return !gameValue || gameValue.toLowerCase() === 'unknown';
 	}
 
-	if (!gameValue || gameValue.trim() === '') {
+	if ((!gameValue || gameValue.trim() === '') && filterType !== 'regionCode') {
 		return false;
 	}
 
@@ -367,8 +391,9 @@ function updateStats() {
  * @param {HTMLSelectElement} selectElement - The select element to populate.
  * @param {string[]} options
  * @param {string} selectedValue - The value to select by default.
+ * @param {Record<string, string>} nameMapping - Custom key-value name mapping
  */
-function populateDropdown(selectElement, options, selectedValue) {
+function populateDropdown(selectElement, options, selectedValue, nameMapping = {}) {
 	const placeholder = selectElement.options[0];
 
 	const uniqueOptionsMap = new Map();
@@ -387,11 +412,17 @@ function populateDropdown(selectElement, options, selectedValue) {
 		.filter(option => option !== 'Unknown' && option !== '...');
 
 	/**
-	 * @type {string[]}
+	 * @type {{name:string;value:string}[]}
 	 */
-	const sortedOptions = filteredOptions.sort((a, b) => {
-		const aStripped = a.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-		const bStripped = b.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+	const sortedOptions = filteredOptions.map((option) => {
+		const mappedName = nameMapping?.[option];
+		return {
+			name: mappedName ? `${option} - ${mappedName}` : option,
+			value: option,
+		};
+	}).sort((a, b) => {
+		const aStripped = a.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+		const bStripped = b.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 		return aStripped.localeCompare(bStripped);
 	});
 
@@ -409,10 +440,10 @@ function populateDropdown(selectElement, options, selectedValue) {
 
 	sortedOptions.forEach((option) => {
 		const optionElement = document.createElement('option');
-		optionElement.value = option;
-		optionElement.textContent = option;
+		optionElement.value = option.value;
+		optionElement.textContent = option.name;
 
-		if (option === selectedValue) {
+		if (option.value === selectedValue) {
 			optionElement.selected = true;
 		}
 
@@ -421,8 +452,8 @@ function populateDropdown(selectElement, options, selectedValue) {
 }
 
 function populateFilterDropdowns() {
-	populateDropdown(regionFilterElement, filters.region, activeFilters.region);
-	populateDropdown(languageFilterElement, filters.language, activeFilters.language);
+	populateDropdown(regionFilterElement, filters.region, activeFilters.region, regionNames);
+	populateDropdown(languageFilterElement, filters.language, activeFilters.language, languageNames);
 	populateDropdown(developerFilterElement, filters.developer, activeFilters.developer);
 	populateDropdown(publisherFilterElement, filters.publisher, activeFilters.publisher);
 	populateDropdown(
@@ -431,8 +462,9 @@ function populateFilterDropdowns() {
 			new Set(db.map((game) => game.id?.[3]).filter((c) => RegExp(/[A-Z]/i).exec(c))),
 		).sort(),
 		activeFilters.regionCode,
+		regionCodeNames,
 	);
-	populateDropdown(systemTypeFilterElement, filters.type, activeFilters.type);
+	populateDropdown(systemTypeFilterElement, filters.type, activeFilters.type, systemTypeNames);
 }
 
 function calculateFilterOptions() {
@@ -655,7 +687,7 @@ function showDeleteDialog(gameId) {
 	dialog.id = `dia-del-${gameId}`;
 	dialog.innerHTML = `
 	<div class='dialog-container'>
-		<img 
+		<img
 			src='index.php?action=get_asset&type=cover&id=${encodeURIComponent(gameId)}'
 			alt=''
 			onerror="this.onerror=null; this.src='/assets/images/missing_cover.png';"
