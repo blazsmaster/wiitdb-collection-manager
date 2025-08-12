@@ -36,6 +36,21 @@
  * @property {string} publisher
  * @property {string} type
  * @property {boolean} checked
+ * @property {MatchDetails} [searchMatchDetails]
+ */
+
+/**
+ * @typedef {Object} MatchResult
+ * @property {boolean} matches
+ * @property {MatchDetails} [matchDetails]
+ */
+
+/**
+ * @typedef {Object} MatchDetails
+ * @property {string} field
+ * @property {number} index
+ * @property {number} length
+ * @property {string} [matchedValue]
  */
 
 /**

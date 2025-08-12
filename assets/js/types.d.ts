@@ -32,6 +32,19 @@ interface Game {
 	publisher: string;
 	type: string;
 	checked: boolean;
+	searchMatchDetails?: MatchDetails;
+}
+
+interface MatchResult {
+	matches: boolean;
+	matchDetails?: MatchDetails;
+}
+
+interface MatchDetails {
+	field: string;
+	index: number;
+	length: number;
+	matchedValue?: string;
 }
 
 interface LanguageSrc {

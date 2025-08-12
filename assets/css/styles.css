@@ -379,3 +379,21 @@ dialog .tab-content span.tool {
   display: none;
   margin: 10px 0;
 }
+
+/* Highlighting */
+
+.search-match-highlight {
+  border: 1px solid var(--primary-color);
+  background-color: color-mix(in oklch, var(--primary-color) 20%, transparent);
+  border-radius: 2px;
+  padding: 0 2px;
+  display: inline-block;
+}
+
+.name-match-tag {
+  font-size: 0.8em;
+  color: var(--primary-color);
+  border-radius: 4px;
+  margin-top: 3px;
+  display: inline-block;
+}

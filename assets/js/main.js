@@ -202,10 +202,21 @@ function applyFilters() {
 			(hideHomebrew && gameType === 'homebrew') ||
 			(hideDemo && isMatchingDemo(game)) ||
 			(hideService && isServiceTitle(game)) ||
-			(hideIncomplete && hasUnknownValue(game)) ||
-			(searchTerm && searchField && !matchesSearchTerm(game, searchField, searchTerm))
+			(hideIncomplete && hasUnknownValue(game))
 		) {
 			return false;
+		}
+
+		delete game.searchMatchDetails;
+
+		if (searchTerm && searchField) {
+			const result = matchesSearchTerm(game, searchField, searchTerm);
+			if (!result.matches) {
+				return false;
+			}
+			if (result.matchDetails) {
+				game.searchMatchDetails = result.matchDetails;
+			}
 		}
 
 		return matchesFilter(game, 'region') &&
@@ -304,23 +315,114 @@ function isMatchingDemo(game) {
  * @param {Game} game
  * @param {string} field
  * @param {string} searchTerm
+ * @returns {MatchResult}
  */
 function matchesSearchTerm(game, field, searchTerm) {
 	if (!game[field]) {
-		return false;
+		return { matches: false };
 	}
 	if (game[field].toLowerCase() === 'unknown') {
-		return false;
+		return { matches: false };
 	}
+
 	if (field === 'developer' || field === 'publisher') {
-		const values = parseAttributeString(game[field]);
-		return values.some(value => value.toLowerCase().includes(searchTerm));
+		return matchDeveloperOrPublisher(game[field], field, searchTerm);
 	}
+
 	if (field === 'name') {
-		return [game['name'], game['title']].join(' ').toLowerCase().includes(searchTerm);
-	} else {
-		return game[field].toLowerCase().includes(searchTerm);
+		return matchGameName(game, searchTerm);
 	}
+
+	return matchGenericField(game[field], field, searchTerm);
+}
+
+/**
+ * Match developer or publisher fields
+ * @param {string} fieldValue
+ * @param {string} fieldName
+ * @param {string} searchTerm
+ * @returns {MatchResult}
+ */
+function matchDeveloperOrPublisher(fieldValue, fieldName, searchTerm) {
+	const values = parseAttributeString(fieldValue);
+
+	for (const value of values) {
+		const valueLower = value.toLowerCase();
+		const matchIndex = valueLower.indexOf(searchTerm);
+
+		if (matchIndex !== -1) {
+			return {
+				matches: true,
+				matchDetails: {
+					field: fieldName,
+					index: matchIndex,
+					length: searchTerm.length,
+					matchedValue: value,
+				},
+			};
+		}
+	}
+
+	return { matches: values.some(value => value.toLowerCase().includes(searchTerm)) };
+}
+
+/**
+ * Match game name field
+ * @param {Game} game
+ * @param {string} searchTerm
+ * @returns {MatchResult}
+ */
+function matchGameName(game, searchTerm) {
+	const titleLower = game['title'].toLowerCase();
+	const titleIndex = titleLower.indexOf(searchTerm);
+
+	if (titleIndex !== -1) {
+		return {
+			matches: true,
+			matchDetails: {
+				field: 'title',
+				index: titleIndex,
+				length: searchTerm.length,
+			},
+		};
+	}
+
+	const nameLower = game['name'].toLowerCase();
+	const nameIndex = nameLower.indexOf(searchTerm);
+
+	if (nameIndex !== -1) {
+		return {
+			matches: true,
+			matchDetails: {
+				field: 'name',
+				index: nameIndex,
+				length: searchTerm.length,
+			},
+		};
+	}
+
+	return { matches: false };
+}
+
+/**
+ * Match a generic field with the search term
+ * @param {string} fieldValue
+ * @param {string} fieldName
+ * @param {string} searchTerm
+ * @returns {MatchResult}
+ */
+function matchGenericField(fieldValue, fieldName, searchTerm) {
+	const valueLower = fieldValue.toLowerCase();
+	const index = valueLower.indexOf(searchTerm);
+
+	return {
+		matches: index !== -1,
+		matchDetails: index !== -1 ? {
+			field: fieldName,
+			index: index,
+			length: searchTerm.length,
+		} : undefined,
+	};
 }
 
 /**
@@ -522,8 +624,29 @@ function renderTable(page = 1) {
 	const totalPages = Math.ceil(filteredGames.length / PAGINATION_TABLE_ROWS);
 	const displayGames = filteredGames.slice(startIndex, endIndex);
 
-	// Table generator start
-	let html = `
+	// Generate table
+	let html = generateTableHeader();
+
+	// Generate rows
+	for (const game of displayGames) {
+		html += generateTableRow(game);
+	}
+
+	// End table
+	html += `</tbody></table>`;
+
+	if (displayGames.length === 0) {
+		html += '<p style="text-align: center"><i>No games found matching the current filters, please adjust your filters. :(</i></p>';
+	}
+
+	areaElement.innerHTML = html;
+
+	attachImageEventListeners();
+	renderPagination(totalPages, currentPage);
+}
+
+function generateTableHeader() {
+	return `
 	<table>
 	  <thead>
 	    <tr>
@@ -541,130 +664,255 @@ function renderTable(page = 1) {
 	  </thead>
 	  <tbody>
 	`;
+}
 
-	for (const game of displayGames) {
-		const coverSrc = `index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`;
-		const discSrc = `index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`;
+/**
+ * Generates a table row for a game
+ * @param {Game} game - The game to generate a row for
+ */
+function generateTableRow(game) {
+	let html = '<tr>';
 
-		// Start row
-		html += '<tr>';
-		// Checkbox
-		html += `
-		<td class='fit-cell'>
-			<input
-				type='checkbox'
-				${game.checked ? 'checked' : ''}
-				title='${game.checked ? 'Do I still want to keep this game?' : 'Do I own this game?'}'
-				onchange='toggleChecked("${game.id}")'
-			/>
-		</td>`;
-		// Cover art
-		html += `
-    <td class='overflow-protect fit-cell'>
-    	<img
-    		src='${coverSrc}'
-    		data-img-src='${coverSrc}'
-    		alt=''
-    		loading='lazy'
-    		class='image-asset-inline'
-    	/>
-    </td>`;
-		// Disc art
-		html += `
-		<td class='overflow-protect fit-cell'>
-			<img
-				src='${discSrc}'
-				data-img-src='${discSrc}'
-				alt=''
-				loading='lazy'
-				class='image-asset-inline'
-			/>
-		</td>`;
-		// ID
-		html += `<td class='mono'>${game.id}</td>`;
-		// Name
-		html += `
-		<td
-			class='overflow-protect ${ifEmpty(game.name, 'bg-cell-danger')}'
-			style='max-width: 300px'
-			title='${game.name}'
-		>
-			${game.title}
-		</td>`;
-		// Region
-		html += `
-		<td
-			class='overflow-protect ${ifEmpty(game.region, 'bg-cell-danger')}'
-			style='white-space: nowrap'
-		>
-			${generateRegionFlagHtml(game)}
-		</td>`;
+	// Checkbox
+	html += generateCheckboxCell(game);
+	// Cover art
+	html += generateImageCell(`index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`);
+	// Disc art
+	html += generateImageCell(`index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`);
+	// ID
+	html += generateIdCell(game);
+	// Name
+	html += generateNameCell(game);
+	// Region
+	html += generateRegionCell(game);
+	// Languages
+	html += generateLanguagesCell(game);
+	// Developers
+	html += generateDeveloperCell(game);
+	// Publishers
+	html += generatePublisherCell(game);
+	// Action buttons
+	html += generateActionCell(game);
 
-		// Languages
-		html += `
-		<td
-			class='overflow-protect ${ifEmpty(game.language, 'bg-cell-danger')}'
-			style='max-width: 150px'
-		>`;
+	// End row
+	html += '</tr>';
 
+	return html;
+}
 
-		const languageAssets = getFlagSrc(game);
-		languageAssets.forEach((assetUrl) => {
-			html += buildFlagElement(assetUrl.code, assetUrl.name, assetUrl.url);
+/**
+ * Generates the checkbox cell
+ * @param {Game} game
+ */
+function generateCheckboxCell(game) {
+	return `
+	<td class='fit-cell'>
+		<input
+			type='checkbox'
+			${game.checked ? 'checked' : ''}
+			title='${game.checked ? 'Do I still want to keep this game?' : 'Do I own this game?'}'
+			onchange='toggleChecked("${game.id}")'
+		/>
+	</td>`;
+}
+
+/**
+ * Generates an image cell
+ * @param {string} src
+ */
+function generateImageCell(src) {
+	return `
+	<td class='overflow-protect fit-cell'>
+		<img
+			src='${src}'
+			data-img-src='${src}'
+			alt=''
+			loading='lazy'
+			class='image-asset-inline'
+		/>
+	</td>`;
+}
+
+/**
+ * Generates the ID cell
+ * @param {Game} game
+ */
+function generateIdCell(game) {
+	let cellContent = '';
+	if (game.searchMatchDetails && game.searchMatchDetails.field === 'id') {
+		cellContent = highlightMatchedText(
+			game.id,
+			game.searchMatchDetails.index,
+			game.searchMatchDetails.length,
+		);
+	} else {
+		cellContent = game.id;
+	}
+	return `<td class='mono'>${cellContent}</td>`;
+}
+
+/**
+ * Generates the name cell
+ * @param {Game} game
+ */
+function generateNameCell(game) {
+	let nameContent = '';
+
+	if (game.searchMatchDetails) {
+		if (game.searchMatchDetails.field === 'title') {
+			nameContent = highlightMatchedText(
+				game.title,
+				game.searchMatchDetails.index,
+				game.searchMatchDetails.length,
+			);
+		} else if (game.searchMatchDetails.field === 'name') {
+			nameContent = `${game.title}<br><span class='name-match-tag'>${highlightMatchedText(
+				game.name,
+				game.searchMatchDetails.index,
+				game.searchMatchDetails.length,
+			)}</span>`;
+		} else {
+			nameContent = game.title;
+		}
+	} else {
+		nameContent = game.title;
+	}
+
+	return `
+	<td
+		class='overflow-protect ${ifEmpty(game.name, 'bg-cell-danger')}'
+		style='max-width: 300px'
+		title='${game.name}'
+	>
+		${nameContent}
+	</td>`;
+}
+
+/**
+ * Generates the region cell
+ * @param {Game} game
+ */
+function generateRegionCell(game) {
+	return `
+	<td
+		class='overflow-protect ${ifEmpty(game.region, 'bg-cell-danger')}'
+		style='white-space: nowrap'
+	>
+		${generateRegionFlagHtml(game)}
+	</td>`;
+}
+
+/**
+ * Generates the languages cell
+ * @param {Game} game
+ */
+function generateLanguagesCell(game) {
+	let flagsHtml = '';
+	const languageAssets = getFlagSrc(game);
+	languageAssets.forEach((assetUrl) => {
+		flagsHtml += buildFlagElement(assetUrl.code, assetUrl.name, assetUrl.url);
+	});
+
+	return `
+	<td
+		class='overflow-protect ${ifEmpty(game.language, 'bg-cell-danger')}'
+		style='max-width: 150px'
+	>
+		${flagsHtml}
+	</td>`;
+}
+
+/**
+ * Generates the developer cell
+ * @param {Game} game
+ */
+function generateDeveloperCell(game) {
+	let developerContent = '';
+
+	if (game.developer) {
+		developerContent = generateSearchableList(
+			game.developer,
+			'developer',
+			game.searchMatchDetails,
+		);
+	}
+
+	return `
+	<td
+		class='overflow-protect ${ifEmpty(game.developer, 'bg-cell-danger')}'
+		style='max-width: 150px'
+	>
+		${developerContent}
+	</td>`;
+}
+
+/**
+ * Generates the publisher cell
+ * @param {Game} game
+ */
+function generatePublisherCell(game) {
+	let publisherContent = '';
+
+	if (game.publisher) {
+		publisherContent = generateSearchableList(
+			game.publisher,
+			'publisher',
+			game.searchMatchDetails,
+		);
+	}
+
+	return `
+	<td
+		class='overflow-protect ${ifEmpty(game.publisher, 'bg-cell-danger')}'
+		style='max-width: 150px'
+	>
+		${publisherContent}
+	</td>`;
+}
+
+/**
+ * Generate list with search highlighting
+ * @param {string} fieldValue
+ * @param {string} fieldName
+ * @param {Object} searchMatchDetails
+ */
+function generateSearchableList(fieldValue, fieldName, searchMatchDetails) {
+	const items = fieldValue.split(' / ').map(item => item.trim());
+	let html = '';
+
+	if (searchMatchDetails && searchMatchDetails.field === fieldName) {
+		const searchTerm = searchInputElement.value.toLowerCase();
+		items.forEach((item, index) => {
+			const itemLower = item.toLowerCase();
+			if (itemLower.includes(searchTerm)) {
+				const matchIndex = itemLower.indexOf(searchTerm);
+				html += `${highlightMatchedText(
+					item,
+					matchIndex,
+					searchTerm.length,
+				)}${index < items.length - 1 ? '<br>' : ''}`;
+			} else {
+				html += `${escapeUnknownStr(item)}${index < items.length - 1 ? '<br>' : ''}`;
+			}
 		});
-
-		html += `</td>`;
-
-		// Developer
-		html += `
-		<td
-			class='overflow-protect ${ifEmpty(game.developer, 'bg-cell-danger')}'
-			style='max-width: 150px'
-		>`;
-		if (game.developer) {
-			const developers = game.developer.split(' / ').map(dev => dev.trim());
-			developers.forEach((dev, index) => {
-				html += `${escapeUnknownStr(dev)}${index < developers.length - 1 ? '<br>' : ''}`;
-			});
-		}
-		html += `</td>`;
-
-		// Publisher
-		html += `
-		<td
-			class='overflow-protect ${ifEmpty(game.publisher, 'bg-cell-danger')}'
-			style='max-width: 150px'
-		>`;
-		if (game.publisher) {
-			const publishers = game.publisher.split(' / ').map(pub => pub.trim());
-			publishers.forEach((pub, index) => {
-				html += `${escapeUnknownStr(pub)}${index < publishers.length - 1 ? '<br>' : ''}`;
-			});
-		}
-		html += `</td>`;
-
-		// Action buttons
-		html += `
-    <td>
-			<button class='btn-danger' onclick='showDeleteDialog("${game.id}")'>Delete</button>
-		</td>
-		`;
-
-		// End row
-		html += '</tr>';
+	} else {
+		items.forEach((item, index) => {
+			html += `${escapeUnknownStr(item)}${index < items.length - 1 ? '<br>' : ''}`;
+		});
 	}
 
-	// Fix table generator end
-	html += `</tbody></table>`;
+	return html;
+}
 
-	if (displayGames.length === 0) {
-		html += '<p style="text-align: center"><i>No games found matching the current filters, please adjust your filters. :(</i></p>';
-	}
-
-	areaElement.innerHTML = html;
-
-	attachImageEventListeners();
-	renderPagination(totalPages, currentPage);
+/**
+ * Generates the action buttons cell
+ * @param {Game} game
+ */
+function generateActionCell(game) {
+	return `
+	<td>
+		<button class='btn-danger' onclick='showDeleteDialog("${game.id}")'>Delete</button>
+	</td>`;
 }
 
 /**
@@ -1144,4 +1392,22 @@ function parseAttributeString(attrStr) {
  */
 function ifEmpty(value, defaultValue) {
 	return value.trim() === '' ? defaultValue : value;
+}
+
+/**
+ * Highlights the matched part of a text string
+ * @param {string} text - Original text to process
+ * @param {number} index - Starting index of the match
+ * @param {number} length - Length of the matched part
+ */
+function highlightMatchedText(text, index, length) {
+	if (index < 0 || !text) {
+		return text;
+	}
+
+	const before = text.substring(0, index);
+	const match = text.substring(index, index + length);
+	const after = text.substring(index + length);
+
+	return `${before}<span class='search-match-highlight'>${match}</span>${after}`;
 }
