@@ -83,7 +83,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>
+                <td style='position: relative'>
                   <input
                     type='text'
                     id='searchInput'
@@ -101,9 +101,12 @@
                     <option value='developer'>Developer</option>
                     <option value='publisher'>Publisher</option>
                   </select>
-                </td>
-                <td>
-                  <button id='clearFilter'>
+
+                  <button
+                    id='clearFilter'
+                    class='btn btn-primary'
+                    style='position: absolute; right: 0; top: 0'
+                  >
                     Clear Filters &cross;
                   </button>
                 </td>
