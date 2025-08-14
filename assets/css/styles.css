@@ -378,6 +378,20 @@ dialog .tab-content span.tool {
   margin: 10px 0;
 }
 
+.example-code {
+  font-size: 1.2em;
+  padding: 5px;
+  background-color: oklch(0.955 0 89.876);
+  border: 1px var(--border-color) solid;
+}
+
+.example-code-container {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin-top: 15px;
+}
+
 /* Highlighting */
 
 .search-match-highlight {
