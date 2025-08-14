@@ -93,6 +93,5 @@
 
     <?php include_once 'includes/components/help_dialog.php'; ?>
   </body>
-  <script src='assets/js/datasets/keyToValue.js'></script>
-  <script src='assets/js/main.js'></script>
+  <script type='module' src='assets/js/index.js'></script>
 </html>

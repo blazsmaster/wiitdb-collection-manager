@@ -38,7 +38,6 @@ A little personal project to browse and manage your Wii game catalog provided by
 You can customize the application by modifying the following files:
 
 - `includes/config.php` - Change site title, language, and other static settings
-- `assets/js/main.js` - Modify the frontend functionality (you can make the site unstable and broken :D)
 
 ## About WiiTDB
 

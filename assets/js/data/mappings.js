@@ -1,4 +1,4 @@
-const languageNames = {
+export const languageNames = {
 	DE: 'German',
 	DK: 'Danish',
 	EN: 'English',
@@ -19,7 +19,7 @@ const languageNames = {
 	ZHTW: 'Chinese (Traditional, Taiwan)',
 };
 
-const regionNames = {
+export const regionNames = {
 	'NTSC-J': 'Japan',
 	'NTSC-K': 'Korea',
 	'NTSC-T': 'Taiwan',
@@ -28,7 +28,7 @@ const regionNames = {
 	'PAL-R': 'Europe (Russia)',
 };
 
-const systemTypeNames = {
+export const systemTypeNames = {
 	Channel: 'Wii Channel',
 	CUSTOM: 'Custom',
 	GameCube: 'GameCube',
@@ -45,7 +45,7 @@ const systemTypeNames = {
 	'VC-SNES': 'Super Nintendo (Virtual)',
 };
 
-const regionCodeNames = {
+export const regionCodeNames = {
 	D: 'German',
 	E: 'USA',
 	F: 'French',
