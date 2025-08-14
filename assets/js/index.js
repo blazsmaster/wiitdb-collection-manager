@@ -66,91 +66,39 @@ function setupEventListeners() {
 	searchFieldElement.addEventListener('change', applyFilters);
 
 	// Advanced checkbox filters
-	hideDemoElement.addEventListener('change', applyFilters);
-	hideServiceElement.addEventListener('change', applyFilters);
-	hideCustomElement.addEventListener('change', applyFilters);
-	hideIncompleteElement.addEventListener('change', applyFilters);
-	hideVirtualConsoleElement.addEventListener('change', applyFilters);
-	hideWiiWareElement.addEventListener('change', applyFilters);
-	hideHomebrewElement.addEventListener('change', applyFilters);
+	[
+		hideDemoElement,
+		hideServiceElement,
+		hideCustomElement,
+		hideIncompleteElement,
+		hideVirtualConsoleElement,
+		hideWiiWareElement,
+		hideHomebrewElement,
+	].forEach(el => el.addEventListener('change', applyFilters));
 
 	// Filters
-	regionFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: this.value,
-			language: languageFilterElement.value,
-			developer: developerFilterElement.value,
-			publisher: publisherFilterElement.value,
-			regionCode: regionCodeFilterElement.value,
-			type: systemTypeFilterElement.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
-	});
+	const filterElements = [
+		regionFilterElement,
+		languageFilterElement,
+		developerFilterElement,
+		publisherFilterElement,
+		regionCodeFilterElement,
+		systemTypeFilterElement,
+	];
 
-	languageFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: regionFilterElement.value,
-			language: this.value,
-			developer: developerFilterElement.value,
-			publisher: publisherFilterElement.value,
-			regionCode: regionCodeFilterElement.value,
-			type: systemTypeFilterElement.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
-	});
-
-	developerFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: regionFilterElement.value,
-			language: languageFilterElement.value,
-			developer: this.value,
-			publisher: publisherFilterElement.value,
-			regionCode: regionCodeFilterElement.value,
-			type: systemTypeFilterElement.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
-	});
-
-	publisherFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: regionFilterElement.value,
-			language: languageFilterElement.value,
-			developer: developerFilterElement.value,
-			publisher: this.value,
-			regionCode: regionCodeFilterElement.value,
-			type: systemTypeFilterElement.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
-	});
-
-	regionCodeFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: regionFilterElement.value,
-			language: languageFilterElement.value,
-			developer: developerFilterElement.value,
-			publisher: publisherFilterElement.value,
-			regionCode: this.value,
-			type: systemTypeFilterElement.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
-	});
-
-	systemTypeFilterElement.addEventListener('change', function () {
-		const activeFilters = {
-			region: regionFilterElement.value,
-			language: languageFilterElement.value,
-			developer: developerFilterElement.value,
-			publisher: publisherFilterElement.value,
-			regionCode: regionCodeFilterElement.value,
-			type: this.value,
-		};
-		setActiveFilters(activeFilters);
-		applyFilters();
+	filterElements.forEach(el => {
+		el.addEventListener('change', function () {
+			const activeFilters = {
+				region: regionFilterElement.value,
+				language: languageFilterElement.value,
+				developer: developerFilterElement.value,
+				publisher: publisherFilterElement.value,
+				regionCode: regionCodeFilterElement.value,
+				type: systemTypeFilterElement.value,
+			};
+			setActiveFilters(activeFilters);
+			applyFilters();
+		});
 	});
 }
 

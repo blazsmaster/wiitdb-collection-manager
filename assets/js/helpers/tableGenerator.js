@@ -4,6 +4,7 @@ import { PAGINATION_TABLE_ROWS } from '../globals.js';
 import { attachImageEventListeners, showMessage } from './ui.js';
 import { escapeUnknownStr, highlightMatchedText, ifEmpty } from '../utils.js';
 import { deleteGame } from './dataService.js';
+import { languageNames } from '../data/mappings.js';
 
 /**
  * Render the game table
@@ -92,9 +93,9 @@ function generateTableRow(game) {
 	// Languages
 	html += generateLanguagesCell(game);
 	// Developers
-	html += generateDeveloperCell(game);
+	html += generateAttributeCell(game, 'developer');
 	// Publishers
-	html += generatePublisherCell(game);
+	html += generateAttributeCell(game, 'publisher');
 	// Action buttons
 	html += generateActionCell(game);
 
@@ -227,50 +228,25 @@ function generateLanguagesCell(game) {
 }
 
 /**
- * Generates the developer cell
+ * Generates a cell for developer or publisher
  * @param {Game} game
+ * @param {string} fieldName
  */
-function generateDeveloperCell(game) {
-	let developerContent = '';
-
-	if (game.developer) {
-		developerContent = generateSearchableList(
-			game.developer,
-			'developer',
+function generateAttributeCell(game, fieldName) {
+	let content = '';
+	if (game[fieldName]) {
+		content = generateSearchableList(
+			game[fieldName],
+			fieldName,
 			game.searchMatchDetails,
 		);
 	}
-
 	return `
 	<td
-		class='overflow-protect ${ifEmpty(game.developer, 'bg-cell-danger')}'
+		class='overflow-protect ${ifEmpty(game[fieldName], 'bg-cell-danger')}'
 		style='max-width: 150px'
 	>
-		${developerContent}
-	</td>`;
-}
-
-/**
- * Generates the publisher cell
- * @param {Game} game
- */
-function generatePublisherCell(game) {
-	let publisherContent = '';
-
-	if (game.publisher) {
-		publisherContent = generateSearchableList(
-			game.publisher,
-			'publisher',
-			game.searchMatchDetails,
-		);
-	}
-
-	return `
-	<td
-		class='overflow-protect ${ifEmpty(game.publisher, 'bg-cell-danger')}'
-		style='max-width: 150px'
-	>
-		${publisherContent}
+		${content}
 	</td>`;
 }
 
@@ -399,27 +375,6 @@ function getFlagSrc(game) {
 	const langCodes = game.language.split(',').map((lang) => lang.trim());
 	langCodes.forEach((langCode) => {
 		let flagCode = langCode.toUpperCase();
-
-		const languageNames = {
-			DE: 'German',
-			DK: 'Danish',
-			EN: 'English',
-			ES: 'Spanish',
-			FI: 'Finnish',
-			FR: 'French',
-			GR: 'Greek',
-			IT: 'Italian',
-			JA: 'Japanese',
-			KO: 'Korean',
-			NL: 'Dutch',
-			NO: 'Norwegian',
-			PT: 'Portuguese',
-			RU: 'Russian',
-			SE: 'Swedish',
-			TR: 'Turkish',
-			ZHCN: 'Chinese (Simplified, Mainland China)',
-			ZHTW: 'Chinese (Traditional, Taiwan)',
-		};
 
 		// Map language codes to flag codes (asset names)
 		const flagMapping = {

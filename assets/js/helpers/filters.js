@@ -76,6 +76,27 @@ export function applyFilters() {
 	renderTable();
 }
 
+/**
+ * Reset a filter element to its default value
+ * @param {HTMLSelectElement} element
+ * @param {string} [defaultValue]
+ */
+function resetFilterElement(element, defaultValue = '') {
+	if (element) {
+		element.value = defaultValue;
+	}
+}
+
+/**
+ * Reset a checkbox element to unchecked state
+ * @param {HTMLInputElement} element
+ */
+function resetCheckbox(element) {
+	if (element) {
+		element.checked = false;
+	}
+}
+
 export function clearFilters() {
 	const activeFilters = {
 		region: '',
@@ -91,20 +112,24 @@ export function clearFilters() {
 	searchInputElement.value = '';
 	searchFieldElement.value = 'id';
 
-	regionFilterElement.value = '';
-	languageFilterElement.value = '';
-	developerFilterElement.value = '';
-	publisherFilterElement.value = '';
-	regionCodeFilterElement.value = '';
-	systemTypeFilterElement.value = '';
+	[
+		regionFilterElement,
+		languageFilterElement,
+		developerFilterElement,
+		publisherFilterElement,
+		regionCodeFilterElement,
+		systemTypeFilterElement,
+	].forEach(el => resetFilterElement(el));
 
-	hideDemoElement.checked = false;
-	hideServiceElement.checked = false;
-	hideCustomElement.checked = false;
-	hideIncompleteElement.checked = false;
-	hideVirtualConsoleElement.checked = false;
-	hideWiiWareElement.checked = false;
-	hideHomebrewElement.checked = false;
+	[
+		hideDemoElement,
+		hideServiceElement,
+		hideCustomElement,
+		hideIncompleteElement,
+		hideVirtualConsoleElement,
+		hideWiiWareElement,
+		hideHomebrewElement,
+	].forEach(el => resetCheckbox(el));
 
 	applyFilters();
 }

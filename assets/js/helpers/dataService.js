@@ -58,6 +58,8 @@ export function calculateFilterOptions() {
 	let publishers = new Set();
 	let systemTypes = new Set();
 
+	const db = getDb();
+
 	for (const game of db) {
 		if (game.region) {
 			regions.add(game.region);
