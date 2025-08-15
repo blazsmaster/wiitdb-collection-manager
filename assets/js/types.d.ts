@@ -28,8 +28,8 @@ interface Game {
 	title: string;
 	region: string;
 	language: string;
-	developer: string;
-	publisher: string;
+	developer: string[];
+	publisher: string[];
 	type: string;
 	checked: boolean;
 	searchMatchDetails?: MatchDetails;

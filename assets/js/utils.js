@@ -8,51 +8,6 @@ export function ifEmpty(value, defaultValue) {
 }
 
 /**
- * Parse a string of attributes separated by slashes and commas
- * @param {string} attrStr
- */
-export function parseAttributeString(attrStr) {
-	if (!attrStr) {
-		return [];
-	}
-	const companySuffixes = [
-		'Inc', 'Inc.',
-		'LLC',
-		'Ltd', 'Ltd.',
-		'Limited',
-		'Corp.', 'Corporation', 'Co.',
-		'Co., Ltd.', 'Co. Ltd.', 'Co Ltd',
-		'GmbH',
-		'S.A.B.',
-	];
-
-	const isCompanySuffix = (str) => companySuffixes.some(suffix => str.trim().toLowerCase() === suffix.toLowerCase());
-
-	const slashParts = attrStr.split('/').map(part => part.trim());
-	let values = [];
-
-	slashParts.forEach(part => {
-		const commaParts = part.split(',').map(p => p.trim());
-		let currentValue = '';
-		commaParts.forEach(commaPart => {
-			if (isCompanySuffix(commaPart) && currentValue) {
-				currentValue += ', ' + commaPart;
-			} else {
-				if (currentValue) {
-					values.push(currentValue);
-				}
-				currentValue = commaPart;
-			}
-		});
-		if (currentValue) {
-			values.push(currentValue);
-		}
-	});
-
-	return values.filter(Boolean);
-}
-
-/**
  * Escape "unknown" string values
  * @param {string} value
  */
@@ -91,3 +46,14 @@ export function highlightMatchedText(text, index, length) {
 
 	return `${before}<span class='search-match-highlight'>${match}</span>${after}`;
 }
+
+/**
+ * Check if a value is empty or unknown
+ * @param {string|Array} value - The value to check
+ */
+export const isEmptyOrUnknown = (value) => {
+	if (Array.isArray(value)) {
+		return value.length === 0 || value.every((val) => !val || val.trim().toLowerCase() === 'unknown');
+	}
+	return !value || value.trim().toLowerCase() === 'unknown';
+};

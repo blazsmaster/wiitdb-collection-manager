@@ -32,8 +32,8 @@
  * @property {string} title
  * @property {string} region
  * @property {string} language
- * @property {string} developer
- * @property {string} publisher
+ * @property {string[]} developer
+ * @property {string[]} publisher
  * @property {string} type
  * @property {boolean} checked
  * @property {MatchDetails} [searchMatchDetails]

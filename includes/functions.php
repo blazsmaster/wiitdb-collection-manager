@@ -54,17 +54,8 @@
                 processAttribute($publisher, $filters['publisher']);
                 processAttribute($type, $filters['type'], false);
 
-                // Join with slashes "/"
-                $developerModded = '';
-                $publisherModded = '';
                 $devParts = parseAttributeString($developer);
                 $pubParts = parseAttributeString($publisher);
-                if (count($devParts) > 0) {
-                    $developerModded = implode(' / ', $devParts);
-                }
-                if (count($pubParts) > 0) {
-                    $publisherModded = implode(' / ', $pubParts);
-                }
 
                 $games[] = [
                     'id' => $id,
@@ -72,8 +63,8 @@
                     'title' => $title,
                     'region' => $region,
                     'language' => $language,
-                    'developer' => $developerModded,
-                    'publisher' => $publisherModded,
+                    'developer' => $devParts,
+                    'publisher' => $pubParts,
                     'type' => $type,
                     'checked' => false
                 ];
@@ -121,7 +112,8 @@
     }
 
     function parseAttributeString($attrStr): array {
-        $slashParts = array_map('trim', explode('/', $attrStr));
+        // Split on ' / ' (surrounded by spaces)
+        $slashParts = array_map('trim', explode(' / ', $attrStr));
         $values = [];
 
         foreach ($slashParts as $part) {

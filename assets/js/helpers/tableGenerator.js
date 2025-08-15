@@ -234,16 +234,20 @@ function generateLanguagesCell(game) {
  */
 function generateAttributeCell(game, fieldName) {
 	let content = '';
-	if (game[fieldName]) {
+	let fieldValue = game[fieldName];
+	if (Array.isArray(fieldValue)) {
+		fieldValue = fieldValue.join(' / ');
+	}
+	if (fieldValue) {
 		content = generateSearchableList(
-			game[fieldName],
+			fieldValue,
 			fieldName,
 			game.searchMatchDetails,
 		);
 	}
 	return `
 	<td
-		class='overflow-protect ${ifEmpty(game[fieldName], 'bg-cell-danger')}'
+		class='overflow-protect ${ifEmpty(fieldValue, 'bg-cell-danger')}'
 		style='max-width: 150px'
 	>
 		${content}
@@ -320,19 +324,25 @@ function generateRegionFlagHtml(game) {
 				html += buildFlagElement('US', game.region);
 				break;
 			case 'PAL':
-				if (regCode === 'X') {
-					html += buildFlagElement('UN', 'Region Free', '', false);
-					html += buildFlagElement('EU', game.region);
-				} else if (regCode === 'D') {
-					html += buildFlagElement('DE', game.region);
-				} else if (regCode === 'F') {
-					html += buildFlagElement('FR', game.region);
-				} else if (regCode === 'I') {
-					html += buildFlagElement('IT', game.region);
-				} else if (regCode === 'S') {
-					html += buildFlagElement('ES', game.region);
-				} else {
-					html += buildFlagElement('EU', game.region);
+				switch (regCode) {
+					case 'X':
+						html += buildFlagElement('UN', 'Region Free', '', false);
+						html += buildFlagElement('EU', game.region);
+						break;
+					case 'D':
+						html += buildFlagElement('DE', game.region);
+						break;
+					case 'F':
+						html += buildFlagElement('FR', game.region);
+						break;
+					case 'I':
+						html += buildFlagElement('IT', game.region);
+						break;
+					case 'S':
+						html += buildFlagElement('ES', game.region);
+						break;
+					default:
+						html += buildFlagElement('EU', game.region);
 				}
 				break;
 			case 'PAL-R':

@@ -18,9 +18,9 @@ import {
 	systemTypeFilterElement,
 } from '../ui/domElements.js';
 import { getActiveFilters, getDb, getFilteredGames, getFilters, setActiveFilters, setFilteredGames } from '../state.js';
-import { parseAttributeString } from '../utils.js';
 import { DISPLAY_UNKNOWN_FILTER } from '../globals.js';
 import { languageNames, regionCodeNames, regionNames, systemTypeNames } from '../data/mappings.js';
+import { isEmptyOrUnknown } from '../utils.js';
 
 export function applyFilters() {
 	const searchTerm = searchInputElement.value.toLowerCase();
@@ -159,7 +159,11 @@ function atLeastOneActiveFilter() {
  * @param {Game} game
  */
 function hasUnknownValue(game) {
-	return !game.region || !game.language || !game.developer || !game.publisher || !game.type;
+	return isEmptyOrUnknown(game.region) ||
+		isEmptyOrUnknown(game.language) ||
+		isEmptyOrUnknown(game.developer) ||
+		isEmptyOrUnknown(game.publisher) ||
+		isEmptyOrUnknown(game.type);
 }
 
 /**
@@ -192,35 +196,34 @@ function matchesSearchTerm(game, field, searchTerm) {
 	if (!game[field]) {
 		return { matches: false };
 	}
-	if (game[field].toLowerCase() === 'unknown') {
+	if (Array.isArray(game[field])) {
+		if (game[field].length === 0 || game[field][0].toLowerCase() === 'unknown') {
+			return { matches: false };
+		}
+		if (field === 'developer' || field === 'publisher') {
+			return matchDeveloperOrPublisher(game[field], field, searchTerm);
+		}
+	}
+	if (typeof game[field] === 'string' && game[field].toLowerCase() === 'unknown') {
 		return { matches: false };
 	}
-
-	if (field === 'developer' || field === 'publisher') {
-		return matchDeveloperOrPublisher(game[field], field, searchTerm);
-	}
-
 	if (field === 'name') {
 		return matchGameName(game, searchTerm);
 	}
-
 	return matchGenericField(game[field], field, searchTerm);
 }
 
 /**
  * Match developer or publisher fields
- * @param {string} fieldValue
+ * @param {string[]} fieldValues
  * @param {string} fieldName
  * @param {string} searchTerm
  * @returns {MatchResult}
  */
-function matchDeveloperOrPublisher(fieldValue, fieldName, searchTerm) {
-	const values = parseAttributeString(fieldValue);
-
-	for (const value of values) {
+function matchDeveloperOrPublisher(fieldValues, fieldName, searchTerm) {
+	for (const value of fieldValues) {
 		const valueLower = value.toLowerCase();
 		const matchIndex = valueLower.indexOf(searchTerm);
-
 		if (matchIndex !== -1) {
 			return {
 				matches: true,
@@ -233,8 +236,7 @@ function matchDeveloperOrPublisher(fieldValue, fieldName, searchTerm) {
 			};
 		}
 	}
-
-	return { matches: values.some(value => value.toLowerCase().includes(searchTerm)) };
+	return { matches: false };
 }
 
 /**
@@ -311,49 +313,63 @@ function matchesFilter(game, filterType) {
 	const gameValue = game[filterType];
 
 	if (activeValue === 'Unknown') {
-		return !gameValue || gameValue.toLowerCase() === 'unknown';
+		return isEmptyOrUnknown(gameValue);
 	}
 
-	if ((!gameValue || gameValue.trim() === '') && filterType !== 'regionCode') {
+	if ((filterType === 'developer' || filterType === 'publisher') && Array.isArray(gameValue) && isEmptyOrUnknown(gameValue)) {
 		return false;
 	}
 
-	if (filterType === 'language') {
-		return gameValue.toLowerCase().includes(activeValue.toLowerCase());
+	if ((!gameValue || (typeof gameValue === 'string' && gameValue.trim() === '')) && filterType !== 'regionCode') {
+		return false;
 	}
 
-	if (filterType === 'developer' || filterType === 'publisher') {
-		const gameValues = gameValue.split(' / ').map(v => v.trim());
-		const activeValues = activeValue.split(' / ').map(v => v.trim());
+	switch (filterType) {
+		case 'language':
+			return gameValue.toLowerCase().includes(activeValue.toLowerCase());
+		case 'developer':
+		case 'publisher':
+			return matchDevOrPublisher(gameValue, activeValue);
+		case 'regionCode': {
+			const region = game.id?.[3];
+			return region ? region === activeValue : false;
+		}
+		case 'type':
+			if (!game.type) {
+				return activeValue === 'Unknown';
+			}
+			return game.type === activeValue;
+		default:
+			return gameValue === activeValue;
+	}
+}
 
-		return gameValues.some(gameVal => {
-			const gameValLower = gameVal.toLowerCase();
-			return activeValues.some(activeVal => {
-				const activeValLower = activeVal.toLowerCase();
-				if (gameValLower === activeValLower) {
-					return true;
-				}
-				return gameValLower.includes(activeValLower) || activeValLower.includes(gameValLower);
-			});
+function matchDevOrPublisher(gameValue, activeValue) {
+	const activeValLower = activeValue.trim().toLowerCase();
+	if (!activeValLower) {
+		return true;
+	}
+
+	if (activeValLower === 'unknown') {
+		return isEmptyOrUnknown(gameValue);
+	}
+
+	if (Array.isArray(gameValue)) {
+		return gameValue.some(gameVal => {
+			if (typeof gameVal !== 'string') {
+				return false;
+			}
+			const gameValLower = gameVal.trim().toLowerCase();
+			return gameValLower === activeValLower || gameValLower.includes(activeValLower);
 		});
 	}
 
-	if (filterType === 'regionCode' && game.id) {
-		const regionCode = game.id[3];
-		if (!regionCode) {
-			return false;
-		}
-		return regionCode === activeValue;
+	// Fallback
+	if (typeof gameValue === 'string') {
+		const gameValLower = gameValue.trim().toLowerCase();
+		return gameValLower === activeValLower || gameValLower.includes(activeValLower);
 	}
-
-	if (filterType === 'type') {
-		if (!game.type) {
-			return activeValue === 'Unknown';
-		}
-		return game.type === activeValue;
-	}
-
-	return gameValue === activeValue;
+	return false;
 }
 
 function updateStats() {
