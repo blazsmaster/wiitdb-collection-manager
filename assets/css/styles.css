@@ -152,9 +152,10 @@ table[class="filter-table"] input[type='checkbox'] {
   margin: 8px 0;
   width: 100%;
   display: flex;
+  gap: 8px;
 }
 
-.pagination-controls button {
+.pagination-controls button, .pagination-controls select {
   margin-right: 4px;
 }
 

@@ -19,7 +19,7 @@ import {
 	searchInputElement,
 	systemTypeFilterElement,
 } from './ui/domElements.js';
-import { renderTable, showDeleteDialog } from './helpers/tableGenerator.js';
+import { renderTable, showDeleteDialog, updatePaginationLimit } from './helpers/tableGenerator.js';
 import { applyFilters, clearFilters } from './helpers/filters.js';
 import { DEBOUNCE_DELAY } from './globals.js';
 import { debounce } from './utils.js';
@@ -106,6 +106,7 @@ window.toggleChecked = toggleChecked;
 window.showDeleteDialog = showDeleteDialog;
 window.renderTable = renderTable;
 window.jumpToPosition = jumpToPosition;
+window.updatePaginationLimit = updatePaginationLimit;
 
 setupEventListeners();
 

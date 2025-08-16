@@ -1,6 +1,6 @@
-import { getCurrentPage, getDb, getFilteredGames, setCurrentPage } from '../state.js';
+import { getCurrentPage, getDb, getFilteredGames, getPaginationLimit, setCurrentPage, setPaginationLimit } from '../state.js';
 import { areaElement, paginationBottomElement, paginationTopElement, searchInputElement } from '../ui/domElements.js';
-import { PAGINATION_TABLE_ROWS } from '../globals.js';
+import { PAGINATION_DEFAULT_LIMIT, PAGINATION_LIMIT_OPTIONS } from '../globals.js';
 import { attachImageEventListeners, showMessage } from './ui.js';
 import { escapeUnknownStr, highlightMatchedText, ifEmpty } from '../utils.js';
 import { deleteGame } from './dataService.js';
@@ -24,9 +24,11 @@ export function renderTable(page = 1) {
 		return;
 	}
 
-	const startIndex = (currentPage - 1) * PAGINATION_TABLE_ROWS;
-	const endIndex = Math.min(startIndex + PAGINATION_TABLE_ROWS, filteredGames.length);
-	const totalPages = Math.ceil(filteredGames.length / PAGINATION_TABLE_ROWS);
+	const rows = getPaginationLimit();
+
+	const startIndex = (currentPage - 1) * rows;
+	const endIndex = Math.min(startIndex + rows, filteredGames.length);
+	const totalPages = Math.ceil(filteredGames.length / rows);
 	const displayGames = filteredGames.slice(startIndex, endIndex);
 
 	// Generate table
@@ -424,38 +426,81 @@ function getFlagSrc(game) {
 function renderPagination(totalPages, currentPage) {
 	const scrollingEnabled = document.body.scrollHeight > window.innerHeight + 20;
 
-	let html = '<div class="pagination-controls">';
+	let limitHtml = `<select onchange='updatePaginationLimit(this.value)'>`;
 
+	PAGINATION_LIMIT_OPTIONS.forEach((opt) => {
+		const selected = getPaginationLimit() === opt ? 'selected' : '';
+		limitHtml += `<option value='${opt}' ${selected}>Show ${opt}</option>`;
+	});
+
+	limitHtml += `</select>`;
+
+	let topHtml = '<div class="pagination-controls">';
+
+	topHtml += limitHtml;
+	topHtml += generatePaginationControls(totalPages, currentPage);
+
+	if (scrollingEnabled) {
+		topHtml += `<button class='jumper' onclick="jumpToPosition('bottom')">Jump to Bottom &darr;</button>`;
+	}
+
+	topHtml += '</div>';
+
+	paginationTopElement.innerHTML = topHtml;
+
+	let bottomHtml = '<div class="pagination-controls">';
+	bottomHtml += generatePaginationControls(totalPages, currentPage);
+
+	if (scrollingEnabled) {
+		bottomHtml += `<button class='jumper' onclick="jumpToPosition('top')">Jump to Top &uarr;</button>`;
+	}
+
+	bottomHtml += '</div>';
+
+	paginationBottomElement.innerHTML = bottomHtml;
+}
+
+/**
+ * Generate pagination controls
+ * @param {number} totalPages
+ * @param {number} currentPage
+ */
+function generatePaginationControls(totalPages, currentPage) {
+	let html = '';
 	if (totalPages > 1) {
-		html += `<button onclick='renderTable(${currentPage - 1})' ${currentPage <= 1 ? 'disabled' : ''}>&lt; Prev</button>`;
-		html += `<button onclick='renderTable(${currentPage + 1})' ${currentPage >= totalPages ? 'disabled' : ''}>Next &gt;</button>`;
+		const prevDisabled = currentPage <= 1 ? 'disabled' : '';
+		const nextDisabled = currentPage >= totalPages ? 'disabled' : '';
+
+		html += '<div>';
+		html += `<button onclick='renderTable(1)' ${prevDisabled}>&lt;&lt;</button>`;
+		html += `<button onclick='renderTable(${currentPage - 1})' ${prevDisabled}>&lt; Prev</button>`;
+		html += `<button onclick='renderTable(${currentPage + 1})' ${nextDisabled}>Next &gt;</button>`;
+		html += `<button onclick='renderTable(${totalPages})' ${nextDisabled}>&gt;&gt;</button>`;
+		html += '</div>';
 
 		const startPage = Math.max(1, currentPage - 5);
 		const endPage = Math.min(totalPages, startPage + 9);
 
+		html += '<div>';
 		for (let page = startPage; page <= endPage; page++) {
 			const className = page === currentPage ? 'current' : '';
 			html += `<button class='${className}' onclick='renderTable(${page})'>${page}</button>`;
 		}
+		html += '</div>';
 
 		html += `<span class='pagination-info'>Page ${currentPage} of ${totalPages}</span>`;
 	}
+	return html;
+}
 
-	if (scrollingEnabled) {
-		html += `<button class='jumper' onclick="jumpToPosition('bottom')">Jump to Bottom &darr;</button>`;
-	}
-
-	html += '</div>';
-
-	paginationTopElement.innerHTML = html;
-
-	let bottomHtml = html;
-	if (scrollingEnabled) {
-		bottomHtml = bottomHtml.replace('Jump to Bottom &darr;', 'Jump to Top &uarr;');
-		bottomHtml = bottomHtml.replace('onclick="jumpToPosition(\'bottom\')"', 'onclick="jumpToPosition(\'top\')"');
-	}
-
-	paginationBottomElement.innerHTML = bottomHtml;
+/**
+ * Update the pagination limit
+ * @param {string} limit
+ */
+export function updatePaginationLimit(limit) {
+	const resultLimit = PAGINATION_LIMIT_OPTIONS.includes(Number(limit)) ? Number(limit) : PAGINATION_DEFAULT_LIMIT;
+	setPaginationLimit(resultLimit);
+	renderTable(1);
 }
 
 /**
