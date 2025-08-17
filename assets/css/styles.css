@@ -102,6 +102,16 @@ button#clearFilter {
   display: none;
 }
 
+.btn:disabled,
+.btn-primary:disabled,
+.btn-success:disabled,
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--border-color) !important;
+  color: var(--border-dark-color) !important;
+}
+
 /* Tables */
 
 table {
@@ -320,14 +330,14 @@ dialog .tab-content li:last-child {
   margin-bottom: 0;
 }
 
-/* Help Dialog */
+/* Dialogs */
 
-#helpDialog {
+#helpDialog, #settingsDialog {
   height: 480px;
   max-height: 480px;
 }
 
-#helpDialog .active {
+#helpDialog .active, #settingsDialog .active {
   display: block;
 }
 

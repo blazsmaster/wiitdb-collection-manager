@@ -6,9 +6,6 @@ export const areaElement = document.getElementById('area');
 export const paginationTopElement = document.getElementById('paginationTop');
 export const paginationBottomElement = document.getElementById('paginationBottom');
 export const clearFilterButtonElement = document.getElementById('clearFilter');
-export const helpDialogElement = document.getElementById('helpDialog');
-export const helpButtonElement = document.getElementById('helpButton');
-export const closeHelpButtonElement = document.getElementById('closeHelpDialog');
 
 // UI Filters
 export const regionFilterElement = document.getElementById('regionFilter');
@@ -26,3 +23,22 @@ export const hideIncompleteElement = document.getElementById('hideIncomplete');
 export const hideVirtualConsoleElement = document.getElementById('hideVirtualConsole');
 export const hideWiiWareElement = document.getElementById('hideWiiWare');
 export const hideHomebrewElement = document.getElementById('hideHomebrew');
+
+// Groups
+export const advancedFilterElements = [
+	hideDemoElement,
+	hideServiceElement,
+	hideCustomElement,
+	hideIncompleteElement,
+	hideVirtualConsoleElement,
+	hideWiiWareElement,
+	hideHomebrewElement,
+];
+export const filterElements = [
+	regionFilterElement,
+	languageFilterElement,
+	developerFilterElement,
+	publisherFilterElement,
+	regionCodeFilterElement,
+	systemTypeFilterElement,
+];

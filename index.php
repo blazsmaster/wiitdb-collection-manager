@@ -60,10 +60,16 @@
           style='gap: 8px; justify-content: center'
         >
           <button
-            id='helpButton'
             class='btn btn-success'
+            data-dialog-open='helpDialog'
           >
             Help &quest;
+          </button>
+          <button
+            class='btn btn-primary'
+            data-dialog-open='settingsDialog'
+          >
+            Settings &#9881;
           </button>
         </div>
         <div id='stats'>
@@ -92,6 +98,7 @@
     <!-- End Main -->
 
     <?php include_once 'includes/components/help_dialog.php'; ?>
+    <?php include_once 'includes/components/settings_dialog.php'; ?>
   </body>
   <script type='module' src='assets/js/index.js'></script>
 </html>

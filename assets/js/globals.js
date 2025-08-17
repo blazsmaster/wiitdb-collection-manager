@@ -7,7 +7,6 @@ export const LS_PAGINATION_LIMIT_KEY = 'paginationLimit';
 export const DEBOUNCE_DELAY = 300;
 export const DISPLAY_UNKNOWN_FILTER = true;
 export const MESSAGE_TIMEOUT_MS = 5000;
-export const PAGINATION_TABLE_ROWS = 100;
 
 // Pagination
 export const PAGINATION_LIMIT_OPTIONS = [10, 25, 50, 100, 250];
