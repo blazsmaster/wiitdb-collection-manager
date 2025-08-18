@@ -1,3 +1,5 @@
+import { initSettingsDialog } from './settings.js';
+
 export function setupDialogEventListeners() {
 	document.querySelectorAll('button[data-dialog-open]').forEach((btn) => {
 		btn.addEventListener('click', function () {
@@ -16,6 +18,17 @@ export function setupDialogEventListeners() {
 		// Tab switching
 		dialog.querySelectorAll('.btn[data-tab]').forEach((tabBtn) => {
 			tabBtn.addEventListener('click', handleTabSwitch);
+		});
+	});
+
+	// Settings dialog open
+	document.querySelectorAll('button[data-dialog-open="settingsDialog"]').forEach((btn) => {
+		btn.addEventListener('click', function () {
+			const dialog = document.getElementById('settingsDialog');
+			if (dialog) {
+				initSettingsDialog();
+				dialog.showModal();
+			}
 		});
 	});
 }

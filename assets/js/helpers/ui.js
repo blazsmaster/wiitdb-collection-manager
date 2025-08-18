@@ -55,11 +55,48 @@ export function handleImgMouseOver(src, event) {
 	}, 300);
 }
 
+export function handleImgMouseOut() {
+	clearTimeout(hoverTimeout);
+	const tooltip = document.getElementById('imgTooltip');
+	if (tooltip) {
+		tooltip.style.display = 'none';
+	}
+}
+
+export function attachImageEventListeners() {
+	const images = document.querySelectorAll('.image-asset-inline');
+	images.forEach(img => {
+		img.addEventListener('mouseover', /*** @param {MouseEvent} event */ function (event) {
+			const src = this.getAttribute('data-img-src');
+			handleImgMouseOver(src, event);
+		});
+		img.addEventListener('mouseout', function () {
+			handleImgMouseOut();
+		});
+	});
+	const compacts = document.querySelectorAll('.compact-img');
+	compacts.forEach(span => {
+		span.addEventListener('mouseover', /*** @param {MouseEvent} event */ function (event) {
+			const src = this.getAttribute('data-img-src');
+			handleImgMouseOver(src, event);
+		});
+		span.addEventListener('mouseout', function () {
+			handleImgMouseOut();
+		});
+	});
+}
+
 /**
- * Position the tooltip based on the mouse event
- * @param {HTMLElement} tooltip
- * @param {MouseEvent} event
+ * @param {JumpPosition} position
  */
+export function jumpToPosition(position) {
+	if (position === 'top') {
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} else if (position === 'bottom') {
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+	}
+}
+
 function positionFixedTooltip(tooltip, event) {
 	const vw = window.innerWidth;
 	const vh = window.innerHeight;
@@ -90,41 +127,4 @@ function positionFixedTooltip(tooltip, event) {
 
 	tooltip.style.left = `${left}px`;
 	tooltip.style.top = `${top}px`;
-}
-
-export function handleImgMouseOut() {
-	clearTimeout(hoverTimeout);
-	hideImgTooltip();
-}
-
-export function hideImgTooltip() {
-	const tooltip = document.getElementById('imgTooltip');
-	if (tooltip) {
-		tooltip.style.display = 'none';
-	}
-}
-
-export function attachImageEventListeners() {
-	const images = document.querySelectorAll('.image-asset-inline');
-	images.forEach(img => {
-		img.addEventListener('mouseover', /*** @param {MouseEvent} event */ function (event) {
-			const src = this.getAttribute('data-img-src');
-			handleImgMouseOver(src, event);
-		});
-
-		img.addEventListener('mouseout', function () {
-			handleImgMouseOut();
-		});
-	});
-}
-
-/**
- * @param {JumpPosition} position
- */
-export function jumpToPosition(position) {
-	if (position === 'top') {
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	} else if (position === 'bottom') {
-		window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
-	}
 }

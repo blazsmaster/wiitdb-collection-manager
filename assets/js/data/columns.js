@@ -1,0 +1,71 @@
+export const TABLE_COLUMNS = [
+	{
+		id: 'checkbox',
+		label: 'I own it checkbox',
+		hideLabel: true,
+		sortable: false,
+		visible: true,
+	},
+	{
+		id: 'cover',
+		label: 'Cover Art',
+		sortable: false,
+		hideLabel: true,
+		visible: true,
+	},
+	{
+		id: 'disc',
+		label: 'Disc Art',
+		hideLabel: true,
+		sortable: false,
+		visible: true,
+	},
+	{
+		id: 'id',
+		label: 'Game ID',
+		sortable: true,
+		visible: true,
+	},
+	{
+		id: 'name',
+		label: 'Game Name',
+		sortable: true,
+		visible: true,
+	},
+	{
+		id: 'region',
+		label: 'Region',
+		sortable: true,
+		visible: true,
+	},
+	{
+		id: 'language',
+		label: 'Languages',
+		sortable: true,
+		visible: true,
+	},
+	{
+		id: 'developer',
+		label: 'Developer',
+		sortable: false,
+		visible: true,
+	},
+	{
+		id: 'publisher',
+		label: 'Publisher',
+		sortable: false,
+		visible: true,
+	},
+	{
+		id: 'type',
+		label: 'Type',
+		sortable: true,
+		visible: true,
+	},
+	{
+		id: 'actions',
+		label: 'Actions',
+		sortable: false,
+		visible: true,
+	},
+];

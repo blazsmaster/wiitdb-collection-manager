@@ -2,10 +2,10 @@
     $id = 'settingsDialog';
     $title = 'Settings';
     $tabs = [
-        'test' => [
-            'label' => 'Hello',
-            'title' => 'Hello World',
-            'path' => 'html/settings_dialog/tab_test.html'
+        'table' => [
+            'label' => 'Table',
+            'title' => 'Table Settings',
+            'path' => 'html/settings_dialog/tab_columns.html'
         ]
     ];
     include __DIR__ . '/dialog.php';

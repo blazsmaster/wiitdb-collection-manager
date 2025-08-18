@@ -125,6 +125,10 @@ th, td {
   border: 1px solid var(--border-color);
 }
 
+.compact-mode th, .compact-mode td {
+  padding: 4px !important;
+}
+
 .fit-cell {
   width: 1%;
   white-space: nowrap;

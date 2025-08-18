@@ -5,6 +5,8 @@ import { attachImageEventListeners, showMessage } from './ui.js';
 import { escapeUnknownStr, highlightMatchedText, ifEmpty } from '../utils.js';
 import { deleteGame } from './dataService.js';
 import { languageNames } from '../data/mappings.js';
+import { getSettings } from './settings.js';
+import { TABLE_COLUMNS } from '../data/columns.js';
 
 /**
  * Render the game table
@@ -53,24 +55,21 @@ export function renderTable(page = 1) {
 }
 
 function generateTableHeader() {
-	return `
-	<table>
-	  <thead>
-	    <tr>
-	    	<th></th>
-	    	<th></th>
-	    	<th></th>
-	      <th>ID</th>
-        <th>Name</th>
-        <th>Region</th>
-        <th>Languages</th>
-        <th>Developer</th>
-        <th>Publisher</th>
-        <th>Actions</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	`;
+	const settings = getSettings();
+	const enabledColumns = settings.table.columns;
+	const compactClass = settings.table.compactMode ? 'compact-mode' : '';
+
+	let headerHtml = `<table class='${compactClass}'><thead><tr>`;
+
+	TABLE_COLUMNS.forEach((col) => {
+		if (enabledColumns.includes(col.id)) {
+			const hideLabel = TABLE_COLUMNS.find(c => c.id === col.id).hideLabel ? '' : col.label;
+			headerHtml += `<th>${col.label ? hideLabel : ''}</th>`;
+		}
+	});
+
+	headerHtml += '</tr></thead><tbody>';
+	return headerHtml;
 }
 
 /**
@@ -78,33 +77,55 @@ function generateTableHeader() {
  * @param {Game} game - The game to generate a row for
  */
 function generateTableRow(game) {
-	let html = '<tr>';
+	const enabledColumns = getSettings().table.columns;
 
-	// Checkbox
-	html += generateCheckboxCell(game);
-	// Cover art
-	html += generateImageCell(`index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`);
-	// Disc art
-	html += generateImageCell(`index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`);
-	// ID
-	html += generateIdCell(game);
-	// Name
-	html += generateNameCell(game);
-	// Region
-	html += generateRegionCell(game);
-	// Languages
-	html += generateLanguagesCell(game);
-	// Developers
-	html += generateAttributeCell(game, 'developer');
-	// Publishers
-	html += generateAttributeCell(game, 'publisher');
-	// Action buttons
-	html += generateActionCell(game);
+	let rowHtml = '<tr>';
 
-	// End row
-	html += '</tr>';
+	TABLE_COLUMNS.forEach((col) => {
+		if (enabledColumns.includes(col.id)) {
+			switch (col.id) {
+				case 'checkbox':
+					rowHtml += generateCheckboxCell(game);
+					break;
+				case 'cover':
+					rowHtml += generateImageCell(`index.php?action=get_asset&type=cover&id=${encodeURIComponent(game.id)}`);
+					break;
+				case 'disc':
+					rowHtml += generateImageCell(`index.php?action=get_asset&type=disc&id=${encodeURIComponent(game.id)}`);
+					break;
+				case 'id':
+					rowHtml += generateIdCell(game);
+					break;
+				case 'name':
+					rowHtml += generateNameCell(game);
+					break;
+				case 'region':
+					rowHtml += generateRegionCell(game);
+					break;
+				case 'language':
+					rowHtml += generateLanguagesCell(game);
+					break;
+				case 'developer':
+					rowHtml += generateAttributeCell(game, 'developer');
+					break;
+				case 'publisher':
+					rowHtml += generateAttributeCell(game, 'publisher');
+					break;
+				case 'type':
+					rowHtml += `<td>${game.type || ''}</td>`;
+					break;
+				case 'actions':
+					rowHtml += generateActionCell(game);
+					break;
+				default:
+					rowHtml += '<td></td>';
+					break;
+			}
+		}
+	});
 
-	return html;
+	rowHtml += '</tr>';
+	return rowHtml;
 }
 
 /**
@@ -128,6 +149,8 @@ function generateCheckboxCell(game) {
  * @param {string} src
  */
 function generateImageCell(src) {
+	const settings = getSettings();
+	const imgClass = settings.table.compactMode ? 'image-asset-inline flag-smol-inline' : 'image-asset-inline';
 	return `
 	<td class='overflow-protect fit-cell'>
 		<img
@@ -135,7 +158,7 @@ function generateImageCell(src) {
 			data-img-src='${src}'
 			alt=''
 			loading='lazy'
-			class='image-asset-inline'
+			class='${imgClass}'
 		/>
 	</td>`;
 }
@@ -397,7 +420,7 @@ function getFlagSrc(game) {
 			ZHTW: 'TW',
 		};
 
-		const langName = languageNames[langCode];
+		const langName = languageNames[flagCode];
 		const regCode = game.id.charAt(3).toUpperCase();
 
 		if (flagCode === 'EN' && ['E', 'N'].includes(regCode)) {

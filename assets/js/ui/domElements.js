@@ -42,3 +42,9 @@ export const filterElements = [
 	regionCodeFilterElement,
 	systemTypeFilterElement,
 ];
+
+// Settings Dialog
+export const settingsDialogElement = document.getElementById('settingsDialog');
+export const compactModeElement = document.getElementById('compactMode');
+export const showTooltipsElement = document.getElementById('showTooltips');
+export const tabColumnsElement = document.getElementById('tabColumns');

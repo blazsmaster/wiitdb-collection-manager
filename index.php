@@ -84,10 +84,7 @@
       </div>
     </div>
 
-    <div
-      id='imgTooltip'
-      class='img-tooltip'
-    ></div>
+    <div id='imgTooltip' class='img-tooltip'></div>
 
     <!-- Main -->
     <div id='paginationTop'></div>

@@ -53,6 +53,19 @@ interface LanguageSrc {
 	url: string;
 }
 
+interface Settings {
+	table: {
+		columns: string[];
+		sortBy: string;
+		sortOrder: SortOrders;
+		pagination: {
+			limit: number;
+		}
+		compactMode: boolean;
+	};
+}
+
 type MessageType = 'success' | 'error' | ''
 type FilterOptions = 'region' | 'language' | 'developer' | 'publisher' | 'regionCode' | 'type'
 type JumpPosition = 'top' | 'bottom'
+type SortOrders = 'asc' | 'desc'

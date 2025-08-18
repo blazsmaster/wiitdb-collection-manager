@@ -18,7 +18,6 @@ import {
 	systemTypeFilterElement,
 } from '../ui/domElements.js';
 import { getActiveFilters, getDb, getFilteredGames, getFilters, setActiveFilters, setFilteredGames } from '../state.js';
-import { DISPLAY_UNKNOWN_FILTER } from '../globals.js';
 import { languageNames, regionCodeNames, regionNames, systemTypeNames } from '../data/mappings.js';
 import { isEmptyOrUnknown } from '../utils.js';
 
@@ -387,7 +386,6 @@ function updateStats() {
  */
 function populateDropdown(selectElement, options, selectedValue, nameMapping = {}) {
 	const placeholder = selectElement.options[0];
-
 	const uniqueOptionsMap = new Map();
 
 	options.forEach(option => {
@@ -397,14 +395,18 @@ function populateDropdown(selectElement, options, selectedValue, nameMapping = {
 		}
 	});
 
-	selectElement.innerHTML = '';
-	selectElement.appendChild(placeholder);
+	let filteredOptions = Array.from(uniqueOptionsMap.values());
 
-	const filteredOptions = Array.from(uniqueOptionsMap.values())
-		.filter(option => option !== 'Unknown' && option !== '...');
+	const unknownIndex = filteredOptions.indexOf('Unknown');
+	if (unknownIndex > 0) {
+		filteredOptions.splice(unknownIndex, 1);
+		filteredOptions.unshift('Unknown');
+	}
+
+	filteredOptions = filteredOptions.filter(option => option !== '...');
 
 	/**
-	 * @type {{name:string;value:string}[]}
+	 * @type {{ name: string, value: string }[]}
 	 */
 	const sortedOptions = filteredOptions.map((option) => {
 		const mappedName = nameMapping?.[option];
@@ -412,33 +414,20 @@ function populateDropdown(selectElement, options, selectedValue, nameMapping = {
 			name: mappedName ? `${option} - ${mappedName}` : option,
 			value: option,
 		};
-	}).sort((a, b) => {
-		const aStripped = a.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-		const bStripped = b.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-		return aStripped.localeCompare(bStripped);
 	});
 
-	if (options.includes('Unknown') && DISPLAY_UNKNOWN_FILTER) {
-		const unknownElement = document.createElement('option');
-		unknownElement.value = 'Unknown';
-		unknownElement.textContent = 'Unknown';
-
-		if ('Unknown' === selectedValue) {
-			unknownElement.selected = true;
-		}
-
-		selectElement.appendChild(unknownElement);
+	selectElement.innerHTML = '';
+	if (placeholder) {
+		selectElement.appendChild(placeholder.cloneNode(true));
 	}
 
-	sortedOptions.forEach((option) => {
+	sortedOptions.forEach((option, idx) => {
 		const optionElement = document.createElement('option');
 		optionElement.value = option.value;
 		optionElement.textContent = option.name;
-
 		if (option.value === selectedValue) {
 			optionElement.selected = true;
 		}
-
 		selectElement.appendChild(optionElement);
 	});
 }

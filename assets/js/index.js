@@ -19,9 +19,11 @@ import { setActiveFilters } from './state.js';
 import { jumpToPosition } from './helpers/ui.js';
 import { loadGamesFromLocalStorage, toggleChecked } from './helpers/dataService.js';
 import { setupDialogEventListeners } from './helpers/dialogs.js';
+import { initSettingsIfMissing } from './helpers/settings.js';
 
 // Initialize the application
 function initApp() {
+	initSettingsIfMissing();
 	loadGamesFromLocalStorage();
 }
 
